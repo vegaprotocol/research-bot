@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "bots"
+version = "0.1.0"
+description = ""
+authors = ["ops <ops@vega.xyz>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9,<3.12"
+# https://python-poetry.org/docs/dependency-specification/#git-dependencies
+# vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", subdirectory = "vega_sim", branch = "next" }
+vega_sim = { path = "../vega-market-sim", develop = false }
+
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
