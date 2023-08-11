@@ -2,10 +2,17 @@ import logging
 
 from bots.services.service import Service
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from bots.services.decorators import threaded
+from bots.services.multiprocessing import threaded
 
 
-class FakeHealthCheckHandler(BaseHTTPRequestHandler):
+class DefaultHealthCheckHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        HealthCheckService.logger.info("%s - - [%s] %s\n" %
+                            (self.client_address[0],
+                             self.log_date_time_string(),
+                             format%args))
+        
+
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -15,7 +22,7 @@ class FakeHealthCheckHandler(BaseHTTPRequestHandler):
 class HealthCheckService(Service):
     logger = logging.getLogger("health-check")
 
-    def __init__(self, host: str, port: int, handler: BaseHTTPRequestHandler):
+    def __init__(self, host: str, port: int, handler: BaseHTTPRequestHandler=DefaultHealthCheckHandler):
         self.host = host
         self.port = port
         self.handler = handler
@@ -26,13 +33,15 @@ class HealthCheckService(Service):
         """
         Run the  health-check server
         """
+        
+        print("OKOKOK")
         HealthCheckService.logger.info(f"Starting server")
         self.webserver = HTTPServer((self.host, self.port), self.handler)
         HealthCheckService.logger.info("Server started at %s:%s" % (self.host, self.port))
         self.webserver.serve_forever()
         print("Server stopped.")
 
-    def __exit__(self):
+    def __del__(self):
         HealthCheckService.logger.info(f"Stopping server")
         if not self.webserver is None:
             self.webserver.server_close()

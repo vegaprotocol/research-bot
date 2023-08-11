@@ -1,16 +1,19 @@
 import logging
 import subprocess
-from bots.services.decorators import threading
+from bots.services.multiprocessing import threaded
 
 
-class VegaWallet:
-    default_bin_path = "vegawallet"
-    logger = logging.getLogger("vegawallet")
+class VegaWalletService:
+    """
+    Start and run the vega wallet process
+    """
+    default_bin_path = "VegaWalletService"
+    logger = logging.getLogger("VegaWalletService")
 
     def __init__(self, bin_path: str, network_name: str, token_file_path: str, wallet_home: str) -> None:
         self.bin_path = bin_path
         if bin_path is None:
-            self.bin_path = VegaWallet.default_bin_path
+            self.bin_path = VegaWalletService.default_bin_path
         
         self.token_file_path = token_file_path
         self.network_name = network_name
@@ -46,7 +49,7 @@ class VegaWallet:
         process = subprocess.Popen(wallet_args, shell=True, stdout=subprocess.PIPE)
         process.wait()
         if process.poll() != 0:
-            raise Exception(f"The {wallet_name} wallet does not exist in the vegawallet")
+            raise Exception(f"The {wallet_name} wallet does not exist in the VegaWalletService")
 
 
     def _wallet_args(self, command: tuple) -> tuple:
@@ -73,10 +76,9 @@ class VegaWallet:
 
     def run(self, check: bool = False) -> subprocess.CompletedProcess:
         """
-        Starts the vegawallet binary for the given network
+        Starts the VegaWalletService binary for the given network
         """
-
-        VegaWallet.logger.info("Starting the vegawallet process")
+        VegaWalletService.logger.info("Starting the VegaWalletService process")
         if self.process != None:
             raise RuntimeError("Wallet is already running")
         
@@ -91,10 +93,10 @@ class VegaWallet:
         try:
             with self.process.stdout:
                 for line in iter(self.process.stdout.readline, b''):
-                    VegaWallet.logger.info(line.decode("utf-8").strip())
+                    VegaWalletService.logger.info(line.decode("utf-8").strip())
                 
         except subprocess.CalledProcessError as e:
-            VegaWallet.logger.error(f"{str(e)}")
+            VegaWalletService.logger.error(f"{str(e)}")
         
         retcode = self.process.poll()
         if check and retcode:
@@ -103,8 +105,8 @@ class VegaWallet:
 
         
     @threaded
-    def background_run(self):
-        VegaWallet.logger.info("Running the wallet in the background")
+    def start(self):
+        VegaWalletService.logger.info("Running the wallet in the background")
         self.run(check=True)
         
 
@@ -113,7 +115,7 @@ class VegaWallet:
         Manage the resource reserved by this class
         """
 
-        VegaWallet.logger.info("Stopping the vegawallet process")
-        # if not self.process is None:
-        #     self.process.kill()
+        VegaWalletService.logger.info("Stopping the VegaWalletService process")
+        if not self.process is None:
+            self.process.kill()
             
