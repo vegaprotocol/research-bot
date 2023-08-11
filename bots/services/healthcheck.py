@@ -34,7 +34,6 @@ class HealthCheckService(Service):
         Run the  health-check server
         """
         
-        print("OKOKOK")
         HealthCheckService.logger.info(f"Starting server")
         self.webserver = HTTPServer((self.host, self.port), self.handler)
         HealthCheckService.logger.info("Server started at %s:%s" % (self.host, self.port))

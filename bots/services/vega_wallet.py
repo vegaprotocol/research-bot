@@ -10,14 +10,15 @@ class VegaWalletService:
     default_bin_path = "VegaWalletService"
     logger = logging.getLogger("VegaWalletService")
 
-    def __init__(self, bin_path: str, network_name: str, token_file_path: str, wallet_home: str) -> None:
+    def __init__(self, bin_path: str, network_name: str, passphrase_file: str, wallet_home: str, wallet_name: str) -> None:
         self.bin_path = bin_path
         if bin_path is None:
             self.bin_path = VegaWalletService.default_bin_path
         
-        self.token_file_path = token_file_path
+        self.passphrase_file = passphrase_file
         self.network_name = network_name
         self.wallet_home = wallet_home
+        self.wallet_name = wallet_name
 
         self.process = None
         self.process_thread = None
@@ -35,10 +36,10 @@ class VegaWalletService:
         if self.network_name is None:
             raise Exception('Network name is none')
         
-        if self.token_file_path is None:
+        if self.passphrase_file is None:
             raise Exception('Passphrase file is none')
         
-        if not exists(self.token_file_path):
+        if not exists(self.passphrase_file):
             raise Exception('Passphrase file does not exists')
         
         if wallet_name is None:
@@ -65,7 +66,7 @@ class VegaWalletService:
             "--load-tokens",
             "--automatic-consent",
             "--tokens-passphrase-file",
-            self.token_file_path,
+            self.passphrase_file,
         )
         
         if not self.wallet_home is None:
@@ -114,7 +115,6 @@ class VegaWalletService:
         """
         Manage the resource reserved by this class
         """
-
         VegaWalletService.logger.info("Stopping the VegaWalletService process")
         if not self.process is None:
             self.process.kill()

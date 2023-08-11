@@ -1,0 +1,6 @@
+[vegawallet]
+wallet_name = "vegamarketsim"
+network = "mainnet-mirror"
+binary = "vegawallet"
+home = ""
+passphrase_file = "./assets/passphrase.txt"
