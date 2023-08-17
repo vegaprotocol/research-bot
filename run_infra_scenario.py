@@ -29,6 +29,7 @@ import logging
 
 from vega_sim.wallet.process import VegaWallet 
 from vega_sim.scenario.constants import Network
+from vega_sim.devops.scenario import DevOpsScenario
 
 from vega_sim.network_service import VegaServiceNetwork
 

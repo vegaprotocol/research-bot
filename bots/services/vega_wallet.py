@@ -94,7 +94,7 @@ class VegaWalletService:
         try:
             with self.process.stdout:
                 for line in iter(self.process.stdout.readline, b''):
-                    VegaWalletService.logger.info(line.decode("utf-8").strip())
+                    VegaWalletService.logger.debug(line.decode("utf-8").strip())
                 
         except subprocess.CalledProcessError as e:
             VegaWalletService.logger.error(f"{str(e)}")
@@ -118,4 +118,5 @@ class VegaWalletService:
         VegaWalletService.logger.info("Stopping the VegaWalletService process")
         if not self.process is None:
             self.process.kill()
+            VegaWalletService.logger.info("Stopped the VegaWalletService process")
             
