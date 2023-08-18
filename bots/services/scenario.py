@@ -1,7 +1,9 @@
 import logging
+import multiprocessing
 
 from bots.services.service import Service
 from bots.services.multiprocessing import threaded
+from bots.vega_sim.network import market_sim_network_from_devops_network_name
 
 from vega_sim.scenario.constants import Network
 from vega_sim.devops.scenario import DevOpsScenario
@@ -43,7 +45,7 @@ class ScenarioService(Service):
         )
 
 
-def services_from_config(vega: VegaServiceNetwork, vega_sim_network_name: str, scenarios_config: dict[str, any]) -> list[Service]:
+def services_from_config(vega_sim_network_name: str, scenarios_config: dict[str, any], network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> list[Service]:
     if scenarios_config is None or len(scenarios_config) < 1:
         raise ValueError("Cannot create services because scenarios are none")
     
@@ -52,18 +54,32 @@ def services_from_config(vega: VegaServiceNetwork, vega_sim_network_name: str, s
     services = []
 
     for scenario_name in scenarios:
-        scenario = scenarios[scenario_name]()
         services.append(ScenarioService(
             scenario_name, 
             scenarios_config[scenario_name], 
-            vega, 
+            network_from_devops_network_name(vega_sim_network_name, network_config_path, wallet_binary, wallet_mutex), 
             vega_sim_network_name, 
-            scenario))
+            scenarios[scenario_name]))
 
     return services
 
 
-def _scenarios_from_config(config: dict[str, dict[str, any]]) -> dict[str, lambda: DevOpsScenario]:
+def network_from_devops_network_name(vega_sim_network_name: str, network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> VegaServiceNetwork:
+    logging.info(f"Creating the vega network service for {vega_sim_network_name}")
+    return VegaServiceNetwork(
+        network=Network[vega_sim_network_name],
+        wallet_path=wallet_binary,
+        run_with_console=False,
+        run_with_wallet=False,
+        governance_symbol = "VEGA",
+        network_config_path = network_config_path,
+        wallet_mutex = wallet_mutex,
+        # wallet_token_path = wallet_token_path,
+        
+    )
+
+
+def _scenarios_from_config(config: dict[str, dict[str, any]]) -> dict[str, DevOpsScenario]:
     result = {}
 
     for scenario_name in config:
@@ -77,7 +93,7 @@ def _scenarios_from_config(config: dict[str, dict[str, any]]) -> dict[str, lambd
         missing = lambda key: f"missing-{key}-for-{scenario_name}"
 
 
-        result.update({f"{scenario_name}": lambda: DevOpsScenario(
+        result.update({f"{scenario_name}": DevOpsScenario(
             binance_code=config[scenario_name].get("biance_code", missing("biance-code")),
             market_manager_args=MarketManagerArgs(
                 market_name=str(market_manager_args.get("market_name", missing("market-name"))),

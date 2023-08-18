@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.9,<3.12"
 # https://python-poetry.org/docs/dependency-specification/#git-dependencies
 # vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", subdirectory = "vega_sim", branch = "next" }
-vega_sim = { path = "../vega-market-sim", develop = false }
+vega_sim = { path = "../vega-market-sim", develop = true }
 
 
 
