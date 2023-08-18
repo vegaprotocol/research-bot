@@ -3,12 +3,6 @@ FROM python:3.11.4-slim
 ENV POETRY_VERSION=1.2.2
 ENV WALLET_VERSION=v0.71.2
 
-ENV VEGA_WALLET_HOME=/opt/home
-ENV VEGA_WALLET_PATH=/bin/vegawallet
-ENV VEGA_USER_WALLET_NAME=vegamarketsim
-ENV VEGA_WALLET_TOKENS_PASSPHRASE_FILE=/assets/wallet-passphrase.txt
-ENV VEGA_WALLET_TOKENS_FILE=/vega_market_sim/wallet-info.json
-
 RUN apt-get update \
     && apt-get install -y \
         git \
@@ -23,8 +17,7 @@ RUN  pip install "poetry==$POETRY_VERSION" \
 
 WORKDIR /research-bots
 
-COPY . ./research-bots
-
+COPY . .
 
 # Prepare wallet and load pre generated key with known parties
 RUN wget -q https://github.com/vegaprotocol/vega/releases/download/$WALLET_VERSION/vegawallet-linux-amd64.zip \
@@ -34,6 +27,7 @@ RUN wget -q https://github.com/vegaprotocol/vega/releases/download/$WALLET_VERSI
     && chmod a+x /bin/vegawallet \
     && vegawallet software version \
     \
-    && make prepare_wallet
+    && make prepare_wallet \
+    && make prepare_bots
 
-ENTRYPOINT ["poetry", "run"]
+ENTRYPOINT ["make"]

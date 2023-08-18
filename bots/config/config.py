@@ -3,7 +3,7 @@ import os
 import os.path
 import logging
 import tomllib
-import urllib.request
+import requests
 import urllib.parse
 
 logger = logging.getLogger("config")
@@ -28,12 +28,14 @@ def _read_config_from_file(file_path: str) -> dict[str, any]:
 
 def _read_config_from_url(url: str) -> dict[str, any]:
     data = None
-    with urllib.request.urlopen(url) as response:
-        config_content = response.read()
-        data = tomllib.loads(config_content, parse_float=float)
+
+    resp = requests.get(url)
+    data = tomllib.loads(resp.text, parse_float=float)
     
     if data is None:
         raise Exception("No config was returned from URL")
+    
+    return data
     
 def read_config(path: str) -> dict[str, any]:
     if is_valid_url(path):

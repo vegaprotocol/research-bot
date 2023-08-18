@@ -13,6 +13,7 @@ def compose_asset_file_name(asset_type: str) -> str:
     system = platform.system().lower()
 
     processor = "amd64" if processor == "x86_64" else processor
+    processor = "amd64" if processor == "" else processor
 
     return f"{asset_type}-{system}-{processor}.zip"
 

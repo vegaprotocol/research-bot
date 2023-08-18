@@ -2,6 +2,8 @@ WALLET_BIN=vegawallet
 CURRENT_WORKING_DIR=$(shell pwd)
 WALLET_PASSPHRASE=123456789
 
+CONFIG_FILE ?= "config.toml"
+
 export BOTS_WORKING_DIR=$(CURRENT_WORKING_DIR)/network
 export PREGENERATED_WALLET_PATH=$(CURRENT_WORKING_DIR)/assets/wallets/vegamarketsim 
 export VEGA_WALLET_HOME=$(CURRENT_WORKING_DIR)/wallethome
@@ -95,4 +97,4 @@ prepare_bots:
 	@poetry install
 
 run_bots: prepare_bots
-	@poetry run python main.py
+	poetry run python main.py --config "$(CONFIG_FILE)"
