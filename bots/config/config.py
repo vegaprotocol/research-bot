@@ -17,6 +17,7 @@ def is_valid_url(x):
         return False
 
 def _read_config_from_file(file_path: str) -> dict[str, any]:
+    logger.info(f"Reading bots config from local file: {file_path}")
     data = None
     with open(file_path, "rb") as f:
         data = tomllib.load(f)
@@ -27,6 +28,7 @@ def _read_config_from_file(file_path: str) -> dict[str, any]:
     return data
 
 def _read_config_from_url(url: str) -> dict[str, any]:
+    logger.info(f"Reading bots config from remote file: {url}")
     data = None
 
     resp = requests.get(url)
