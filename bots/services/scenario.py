@@ -3,7 +3,7 @@ import multiprocessing
 
 from bots.services.service import Service
 from bots.services.multiprocessing import threaded
-from bots.vega_sim.network import market_sim_network_from_devops_network_name
+from bots.vega_sim.network import network_from_devops_network_name
 
 from vega_sim.scenario.constants import Network
 from vega_sim.devops.scenario import DevOpsScenario
@@ -62,21 +62,6 @@ def services_from_config(vega_sim_network_name: str, scenarios_config: dict[str,
             scenarios[scenario_name]))
 
     return services
-
-
-def network_from_devops_network_name(vega_sim_network_name: str, network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> VegaServiceNetwork:
-    logging.info(f"Creating the vega network service for {vega_sim_network_name}")
-    return VegaServiceNetwork(
-        network=Network[vega_sim_network_name],
-        wallet_path=wallet_binary,
-        run_with_console=False,
-        run_with_wallet=False,
-        governance_symbol = "VEGA",
-        network_config_path = network_config_path,
-        wallet_mutex = wallet_mutex,
-        # wallet_token_path = wallet_token_path,
-        
-    )
 
 
 def _scenarios_from_config(config: dict[str, dict[str, any]]) -> dict[str, DevOpsScenario]:

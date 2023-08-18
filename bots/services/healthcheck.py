@@ -51,4 +51,9 @@ class HealthCheckService(Service):
     @threaded
     def start(self):
         self.run()
-        pass
+
+def from_config(config: dict[str, any]) -> HealthCheckService:
+    return HealthCheckService(
+        host=config.get("host", "0.0.0.0"),
+        port=int(config.get("port", 8080))
+    )

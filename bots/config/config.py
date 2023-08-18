@@ -2,7 +2,7 @@ import tomllib
 import os
 import os.path
 import logging
-import tempfile
+import tomllib
 import urllib.request
 import urllib.parse
 
@@ -56,23 +56,17 @@ def local_network_config_path(path: str, devops_network_name: str, base_dir: str
             f.write(config_content.decode('utf-8'))
 
         logger.info("The network config downloaded")
-        return os.path.dirname(file_path)
+        return file_path
     
+    # Add check for the file name
     if os.path.isfile(path):
         return path
 
     raise Exception("Network config does not exists")
 
+def load_network_config_file(file_path: str) -> any:
+    data = None
+    with open(file_path, "rb") as f:
+        data = tomllib.load(f)
 
-def ensure_wallet_token_file(walletname: str, token: str, base_path: str) -> str:
-    """
-    Format defined by vega-market-sim
-    """
-    file_path = os.path.join(base_path, "wallet-token.txt")
-
-    token_file_content = '{"' + walletname + '": "' + token + '"}'
-    
-    with open(file_path, "w") as f:
-        f.write(token_file_content)
-
-    return file_path
+    return data
