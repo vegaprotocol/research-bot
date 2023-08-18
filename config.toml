@@ -1,5 +1,5 @@
 network_config_file = "https://raw.githubusercontent.com/vegaprotocol/networks-internal/main/mainnet-mirror/vegawallet-mainnet-mirror.toml"
-debug = true
+debug = false
 work_dir = "./network"
 
 
@@ -14,7 +14,7 @@ download_wallet_binary = true
 
 wallet_name = "vegamarketsim"
 network = "mainnet-mirror"
-binary = "/home/daniel/www/research-bots/vegawallet" # this will be used when download_wallet_binary = False
+binary = "vegawallet" # this will be used when download_wallet_binary = False
 home = "./wallethome"
 passphrase_file = "./assets/passphrase.txt"
 

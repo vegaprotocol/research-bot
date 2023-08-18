@@ -22,14 +22,15 @@ def main():
     parser.add_argument("-c", "--config", default="./config.toml")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
-    base_path = os.path.abspath("./network")
-
     config = read_config(args.config)
     scenarios_config = dict() if "scenario" not in config else config["scenario"]
     vegawallet_config = config["vegawallet"]
     wallet_binary = vegawallet_config.get("binary")
     devops_network_name = vegawallet_config.get("network", "mainnet-mirror")
+
+    logging.basicConfig(level=logging.DEBUG if bool(config.get("debug", False)) else logging.INFO)
+
+    base_path = os.path.abspath(config.get("work_dir", "./network"))
     market_sim_network_name = market_sim_network_from_devops_network_name(devops_network_name)
 
     network_config_path = local_network_config_path(config.get("network_config_file"), devops_network_name, base_path)
@@ -58,14 +59,10 @@ def main():
         wallet_from_config(vegawallet_config, vegawallet_binary_override),
     ]
     
-
     wallet_mutex = multiprocessing.Lock()
     services += services_from_config(market_sim_network_name, scenarios_config, os.path.dirname(network_config_path), wallet_binary, wallet_mutex)
 
     processes = service_manager(services)
-    catchable_sigs = set(signal.Signals) - {signal.SIGKILL, signal.SIGSTOP}
-    for sig in catchable_sigs:
-        signal.signal(sig, print)
     signal.sigwait([signal.SIGINT, signal.SIGKILL,signal.SIGABRT, signal.SIGTERM, signal.SIGQUIT])
     logging.info("Program received stop signal")
 
