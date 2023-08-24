@@ -1,0 +1,1 @@
+ScenariosConfigType = dict[str, dict[str, any]]

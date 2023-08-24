@@ -1,5 +1,6 @@
 import logging
 import multiprocessing
+import bots.config.types
 
 from bots.services.service import Service
 from bots.services.multiprocessing import threaded
@@ -45,7 +46,7 @@ class ScenarioService(Service):
         )
 
 
-def services_from_config(vega_sim_network_name: str, scenarios_config: dict[str, any], network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> list[Service]:
+def services_from_config(vega_sim_network_name: str, scenarios_config: bots.config.types.ScenariosConfigType, network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> list[Service]:
     if scenarios_config is None or len(scenarios_config) < 1:
         raise ValueError("Cannot create services because scenarios are none")
     
@@ -64,7 +65,7 @@ def services_from_config(vega_sim_network_name: str, scenarios_config: dict[str,
     return services
 
 
-def _scenarios_from_config(config: dict[str, dict[str, any]]) -> dict[str, DevOpsScenario]:
+def _scenarios_from_config(config: bots.config.types.ScenariosConfigType) -> dict[str, DevOpsScenario]:
     result = {}
 
     for scenario_name in config:

@@ -17,7 +17,7 @@ def compose_asset_file_name(asset_type: str) -> str:
 
     return f"{asset_type}-{system}-{processor}.zip"
 
-def download_and_unzip_github_asset(asset_type: str, version: str, output_path: str, repository: str = "vegaprotocol/vega") -> None:    
+def download_and_unzip_github_asset(asset_type: str, version: str, output_path: str, repository: str = "vegaprotocol/vega") -> str:    
     asset_file_name = compose_asset_file_name(asset_type)
     url = f"https://github.com/{repository}/releases/download/{version}/{asset_file_name}"
     logging.info(f"Downloading vegawallet binary from {url}")

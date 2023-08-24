@@ -8,10 +8,11 @@ import multiprocessing
 from bots.services.multiprocessing import service_manager
 from bots.services.scenario import services_from_config
 from bots.services.healthcheck import from_config as healthcheck_from_config
+from bots.services.traders import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
 from bots.config.config import read_config, local_network_config_path, load_network_config_file
 from bots.config.environment import check_env_variables
-from bots.api.core import check_market_exists
+from bots.api.datanode import check_market_exists, get_statistics
 from bots.vega_sim.network import market_sim_network_from_devops_network_name
 from bots.tools.github import download_and_unzip_github_asset
 
@@ -29,15 +30,16 @@ def main():
     devops_network_name = vegawallet_config.get("network", "mainnet-mirror")
 
     logging.basicConfig(level=logging.DEBUG if bool(config.get("debug", False)) else logging.INFO)
-
+    
     base_path = os.path.abspath(config.get("work_dir", "./network"))
     market_sim_network_name = market_sim_network_from_devops_network_name(devops_network_name)
-
     network_config_path = local_network_config_path(config.get("network_config_file"), devops_network_name, base_path)
     network_config = load_network_config_file(network_config_path)
 
     rest_api_endpoints = network_config["API"]["REST"]["Hosts"]
     required_market_names = [scenarios_config[scenario_name]["market_name"] for scenario_name in scenarios_config]
+    statistics = get_statistics(rest_api_endpoints)
+
 
     vegawallet_binary_override = None
     try:
@@ -45,8 +47,8 @@ def main():
         check_market_exists(rest_api_endpoints, required_market_names)
         if bool(vegawallet_config.get("download_wallet_binary", False)):
             vegawallet_binary_override = download_and_unzip_github_asset(
-                "vegawallet", 
-                vegawallet_config.get("version"),
+                "vega", 
+                statistics["appVersion"] if bool(vegawallet_config.get("auto_version", False)) else vegawallet_config.get("version"),
                 base_path,
                 vegawallet_config.get("repository")
             )
@@ -55,7 +57,9 @@ def main():
         return
     
     services = [
-        healthcheck_from_config(config.get("healthcheck", dict())),
+        healthcheck_from_config(config.get("http_server", dict())),
+
+        traders_from_config(config.get("http_server", dict())),
         wallet_from_config(vegawallet_config, vegawallet_binary_override),
     ]
     

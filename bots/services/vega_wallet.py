@@ -58,11 +58,10 @@ class VegaWalletService:
     def _wallet_args(self, command: tuple) -> tuple:
         wallet_args = (
             self.bin_path,
+            "wallet"
         )
         wallet_args = wallet_args + command
         wallet_args = wallet_args + (
-            "service",
-            "run",
             "--network",
             self.network_name,
             "--load-tokens",
