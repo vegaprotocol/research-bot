@@ -1,4 +1,6 @@
 import logging
+import bots.config.types
+
 
 from bots.services.service import Service
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -52,8 +54,8 @@ class HealthCheckService(Service):
     def start(self):
         self.run()
 
-def from_config(config: dict[str, any]) -> HealthCheckService:
+def from_config(config: bots.config.types.HttpServerConfig) -> HealthCheckService:
     return HealthCheckService(
-        host=config.get("host", "0.0.0.0"),
-        port=int(config.get("port", 8080))
+        host=config.interface,
+        port=config.port,
     )

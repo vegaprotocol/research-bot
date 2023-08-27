@@ -1,6 +1,8 @@
 import logging
 import subprocess
 
+
+import bots.config.types
 from typing import Optional
 from bots.services.multiprocessing import threaded
 
@@ -122,14 +124,13 @@ class VegaWalletService:
             VegaWalletService.logger.info("Stopped the VegaWalletService process")
 
 
-def from_config(config: dict[str, any], binary_override: Optional[str]) -> VegaWalletService:
-    wallet_binary = config.get("binary") if binary_override is None else binary_override
-    VegaWalletService.logger.info(f"Vegawallet will start with binary: {wallet_binary}")
+def from_config(config: bots.config.types.WalletConfig) -> VegaWalletService:
+    VegaWalletService.logger.info(f"Vegawallet will start with binary: {config.binary}")
 
     return VegaWalletService(
-        wallet_binary,
-        config.get("network", "mainnet-mirror"),
-        config.get("passphrase_file"),
-        config.get("home"),
-        config.get("wallet_name")
+        config.binary,
+        config.network_name,
+        config.passphrase_file,
+        config.home,
+        config.wallet_name
     )

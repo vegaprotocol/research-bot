@@ -5,6 +5,8 @@ import logging
 import tomllib
 import requests
 import urllib.parse
+import bots.config.types
+
 
 logger = logging.getLogger("config")
 
@@ -39,38 +41,11 @@ def _read_config_from_url(url: str) -> dict[str, any]:
     
     return data
     
-def read_config(path: str) -> dict[str, any]:
+def read_config(path: str) -> bots.config.types.BotsConfig:
+    config_json = None
     if is_valid_url(path):
-        return _read_config_from_url(path)
+        config_json =  _read_config_from_url(path)
 
-    return _read_config_from_file(path)
+    config_json = _read_config_from_file(path)
 
-def local_network_config_path(path: str, devops_network_name: str, base_dir: str) -> str:
-    global logger
-
-    if is_valid_url(path):
-        if not os.path.isdir(base_dir):
-            os.mkdir(base_dir)
-        
-        logger.info(f"Downloading network config from {path} to {base_dir}/vegawallet-{devops_network_name}.toml")
-
-        file_path = os.path.join(base_dir, f"vegawallet-{devops_network_name}.toml")
-        with urllib.request.urlopen(url=path, timeout=5.0) as response, open(file_path, "w") as f:
-            config_content = response.read()
-            f.write(config_content.decode('utf-8'))
-
-        logger.info("The network config downloaded")
-        return file_path
-    
-    # Add check for the file name
-    if os.path.isfile(path):
-        return path
-
-    raise Exception("Network config does not exists")
-
-def load_network_config_file(file_path: str) -> any:
-    data = None
-    with open(file_path, "rb") as f:
-        data = tomllib.load(f)
-
-    return data
+    return bots.config.types.config_from_json(config_json)

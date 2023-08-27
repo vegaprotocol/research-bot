@@ -10,61 +10,64 @@ from bots.services.scenario import services_from_config
 from bots.services.healthcheck import from_config as healthcheck_from_config
 from bots.services.traders import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
-from bots.config.config import read_config, local_network_config_path, load_network_config_file
 from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
-from bots.vega_sim.network import market_sim_network_from_devops_network_name
 from bots.tools.github import download_and_unzip_github_asset
-
+from bots.config.network import load_network_config
+from bots.config.config import read_config
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-c", "--config", default="./config.toml")
     args = parser.parse_args()
 
     config = read_config(args.config)
-    scenarios_config = dict() if "scenario" not in config else config["scenario"]
-    vegawallet_config = config["vegawallet"]
-    wallet_binary = vegawallet_config.get("binary")
-    devops_network_name = vegawallet_config.get("network", "mainnet-mirror")
-
     logging.basicConfig(level=logging.DEBUG if bool(config.get("debug", False)) else logging.INFO)
-    
-    base_path = os.path.abspath(config.get("work_dir", "./network"))
-    market_sim_network_name = market_sim_network_from_devops_network_name(devops_network_name)
-    network_config_path = local_network_config_path(config.get("network_config_file"), devops_network_name, base_path)
-    network_config = load_network_config_file(network_config_path)
+    network_config = load_network_config(config.network_config_file, config.devops_network_name, config.work_dir)
 
-    rest_api_endpoints = network_config["API"]["REST"]["Hosts"]
+    rest_api_endpoints = network_config.api.rest.hosts
     required_market_names = [scenarios_config[scenario_name]["market_name"] for scenario_name in scenarios_config]
     statistics = get_statistics(rest_api_endpoints)
 
+    try:
+        if config.wallet.download_wallet_binary:
+            binary_path = download_and_unzip_github_asset(
+                config.wallet.artifact_name, 
+                statistics["appVersion"] if config.wallet.auto_version else config.wallet.version,
+                config.work_dir,
+                config.wallet.repository,
+            )
+            # We uses vegawallet from the vega binary
+            if config.wallet.artifact_name == "vega":
+                binary_path = [binary_path, "wallet"]
 
-    vegawallet_binary_override = None
+            config.wallet.update_binary(binary_path)
+    except Exception as e:
+        return
+
+
+    scenarios_config = dict() if "scenario" not in config else config["scenario"]
     try:
         check_env_variables()
         check_market_exists(rest_api_endpoints, required_market_names)
-        if bool(vegawallet_config.get("download_wallet_binary", False)):
-            vegawallet_binary_override = download_and_unzip_github_asset(
-                "vega", 
-                statistics["appVersion"] if bool(vegawallet_config.get("auto_version", False)) else vegawallet_config.get("version"),
-                base_path,
-                vegawallet_config.get("repository")
-            )
     except Exception as e:
         logging.error(str(e))
         return
     
     services = [
-        healthcheck_from_config(config.get("http_server", dict())),
-
-        traders_from_config(config.get("http_server", dict())),
-        wallet_from_config(vegawallet_config, vegawallet_binary_override),
+        healthcheck_from_config(config.http_server),
+        traders_from_config(config.http_server),
+        wallet_from_config(config.wallet),
     ]
-    
+
     wallet_mutex = multiprocessing.Lock()
-    services += services_from_config(market_sim_network_name, scenarios_config, os.path.dirname(network_config_path), wallet_binary, wallet_mutex)
+    services += services_from_config(
+        config.vega_market_sim_network_name, 
+        scenarios_config, 
+        os.path.dirname(network_config.file_path), 
+        config.wallet.binary, 
+        wallet_mutex
+    )
 
     processes = service_manager(services)
     signal.sigwait([signal.SIGINT, signal.SIGKILL,signal.SIGABRT, signal.SIGTERM, signal.SIGQUIT])
