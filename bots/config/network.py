@@ -5,7 +5,7 @@ import tomllib
 
 from dataclasses import dataclass
 from typing import Optional
-from bots.config.config import is_valid_url
+from bots.config.config import is_valid_url, logger
 
 @dataclass
 class AppsNetworkConfig:
@@ -75,6 +75,11 @@ def network_config_from_dict(path: str, data: dict[str, any]) -> NetworkConfig:
             rest=api_network_config_from_dict(data["API"]["REST"]),
             graph_ql=api_network_config_from_dict(data["API"]["GraphQL"]),
         ),
+
+        metadata={
+            metadata.get("Key"): metadata.get("Value") 
+            for metadata in data.get("Metadata", []) if "Key" in metadata and "Value" in metadata
+        },
 
         apps=apps_network_config_from_dict(data.get("Apps", dict())),
     )

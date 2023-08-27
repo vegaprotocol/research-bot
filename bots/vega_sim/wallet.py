@@ -1,29 +1,19 @@
-from vega_sim.wallet import VegaWallet
+import bots.config.types
+
+from vega_sim.wallet.vega_wallet import VegaWallet
 
 from typing import Optional
 from multiprocessing import Lock
 
-def from_config(config: dict[str, str], binary_path_override: str, mutex: Optional[Lock]) -> VegaWallet:
+def from_config(config: bots.config.types.WalletConfig, mutex: Optional[Lock]) -> VegaWallet:
     """
     Create the Vegawallet instance implemented by vega-market-sim
     """
 
-    binary_path = config.get()
-
     return VegaWallet(
-        wallet_path = config[]
+        wallet_url = config.wallet_url,
+        wallet_path = config.binary,
+        vega_home_dir = config.home,
+        passphrase_file_path = config.passphrase_file,
+        mutex = mutex,
     )
-
-        config.get("network", "mainnet-mirror"),
-        config.get("passphrase_file"),
-        config.get("home"),
-        config.get("wallet_name")
-    
-
-    
-        # self,
-        # wallet_url: str,
-        # wallet_path: str | list[str],
-        # vega_home_dir: str,
-        # passphrase_file_path: Optional[str] = None,
-        # mutex: Optional[multiprocessing.Lock] = None,
