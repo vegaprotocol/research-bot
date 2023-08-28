@@ -5,13 +5,12 @@ import os.path
 import signal
 import argparse
 import multiprocessing
-import bots.flask.app
+import bots.http.app
 
 from bots.services.multiprocessing import service_manager
 from bots.services.scenario import services_from_config
-from bots.flask.traders_handler import from_config as traders_from_config
+from bots.http.traders_handler import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
-from bots.vega_sim.wallet import from_config as market_sim_wallet_from_config
 from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
 from bots.tools.github import download_and_unzip_github_asset
@@ -25,12 +24,12 @@ def main():
     config = read_bots_config(args.config)
     logging.basicConfig(level=logging.DEBUG if config.debug else logging.INFO)
     config.update_network_config(load_network_config(config.network_config_file, config.devops_network_name, config.work_dir))
-    bots.flask.app.configure_flask(config.debug)
+    bots.http.app.configure_flask(config.debug)
 
 
     wallet_mutex = multiprocessing.Lock()
     traders_svc = traders_from_config(config, wallet_mutex)
-    bots.flask.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
+    bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
 
     scenarios_config = config.scenarios
 
@@ -38,7 +37,6 @@ def main():
     required_market_names = [scenarios_config[scenario_name]["market_name"] for scenario_name in scenarios_config]
     statistics = get_statistics(rest_api_endpoints)
 
-    wallet = market_sim_wallet_from_config(config.wallet, wallet_mutex)
     try:
         if config.wallet.download_wallet_binary:
             binary_path = download_and_unzip_github_asset(
@@ -67,22 +65,18 @@ def main():
         wallet_from_config(config.wallet),
     ]
 
-    # services += services_from_config(
-    #     config.vega_market_sim_network_name, 
-    #     scenarios_config, 
-    #     os.path.dirname(network_config.file_path), 
-    #     config.wallet.binary, 
-    #     wallet_mutex
-    # )
+    services += services_from_config(
+        config.vega_market_sim_network_name, 
+        scenarios_config, 
+        os.path.dirname(config.network_config.file_path), 
+        config.wallet.binary, 
+        wallet_mutex
+    )
 
     processes = service_manager(services)
-    # time.sleep(5)
-    # xxx = wallet.get_keypairs(config.wallet.wallet_name)
-    # print(xxx)
-    # signal.sigwait([signal.SIGINT, signal.SIGKILL,signal.SIGABRT, signal.SIGTERM, signal.SIGQUIT])
-    # logging.info("Program received stop signal")
 
-    bots.flask.app.app.run()
+    bots.http.app.app.run()
+
     for process in processes:
         process.kill()
     
