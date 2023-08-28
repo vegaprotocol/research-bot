@@ -13,8 +13,7 @@ def service_manager(services: list[Service]) -> list[multiprocessing.Process]:
 	errors = []
 	for svc in services:
 		try:
-			if callable(getattr(svc, 'check', None)):
-				svc.check()
+			svc.check()
 		except Exception as ex:
 			errors += [str(ex)]
 

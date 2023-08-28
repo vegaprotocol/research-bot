@@ -18,7 +18,7 @@ def is_valid_url(x):
     except:
         return False
 
-def _read_config_from_file(file_path: str) -> dict[str, any]:
+def read_config_from_file(file_path: str) -> dict[str, any]:
     logger.info(f"Reading bots config from local file: {file_path}")
     data = None
     with open(file_path, "rb") as f:
@@ -29,7 +29,7 @@ def _read_config_from_file(file_path: str) -> dict[str, any]:
     
     return data
 
-def _read_config_from_url(url: str) -> dict[str, any]:
+def read_config_from_url(url: str) -> dict[str, any]:
     logger.info(f"Reading bots config from remote file: {url}")
     data = None
 
@@ -40,12 +40,3 @@ def _read_config_from_url(url: str) -> dict[str, any]:
         raise Exception("No config was returned from URL")
     
     return data
-    
-def read_config(path: str) -> bots.config.types.BotsConfig:
-    config_json = None
-    if is_valid_url(path):
-        config_json =  _read_config_from_url(path)
-
-    config_json = _read_config_from_file(path)
-
-    return bots.config.types.config_from_json(config_json)

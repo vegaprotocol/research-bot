@@ -3,19 +3,22 @@ import subprocess
 
 
 import bots.config.types
-from typing import Optional
+from bots.services.service import Service
 from bots.services.multiprocessing import threaded
 
 
-class VegaWalletService:
+class VegaWalletService(Service):
     """
     Start and run the vega wallet process
     """
     default_bin_path = "VegaWalletService"
     logger = logging.getLogger("VegaWalletService")
 
-    def __init__(self, bin_path: str, network_name: str, passphrase_file: str, wallet_home: str, wallet_name: str) -> None:
-        self.bin_path = bin_path
+    def __init__(self, bin_path: str | list[str], network_name: str, passphrase_file: str, wallet_home: str, wallet_name: str) -> None:
+        if isinstance(bin_path, str):
+            self.bin_path = [bin_path]
+        else:
+            self.bin_path = bin_path
         if bin_path is None:
             self.bin_path = VegaWalletService.default_bin_path
 
@@ -27,11 +30,18 @@ class VegaWalletService:
         self.process = None
         self.process_thread = None
 
-    def check_wallet(self, wallet_name: str):
+    def wait(self):
+        pass
+
+    def check(self):
         from shutil import which
         from os.path import isdir, exists
+        
+        wallet_binary = self.bin_path
+        if not isinstance(self.bin_path, str):
+            wallet_binary = self.bin_path[0]
 
-        if which(self.bin_path) is None:
+        if which(wallet_binary) is None:
             raise Exception("Wallet binary not found")
 
         if not self.wallet_home is None and not isdir(self.wallet_home):
@@ -46,34 +56,39 @@ class VegaWalletService:
         if not exists(self.passphrase_file):
             raise Exception('Passphrase file does not exists')
 
-        if wallet_name is None:
+        if self.wallet_name is None:
             raise Exception('Wallet name cannot be None for check function')
+        
+        # add check for free port
 
-        wallet_args = self._wallet_args(("key", "list", "--wallet", wallet_name))
+        wallet_args = self._wallet_args(["key", "list", "--wallet", self.wallet_name])
         print(wallet_args)
-        process = subprocess.Popen(wallet_args, shell=True, stdout=subprocess.PIPE)
+        process = subprocess.Popen(wallet_args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         process.wait()
         if process.poll() != 0:
-            raise Exception(f"The {wallet_name} wallet does not exist in the VegaWalletService")
+            out, err = process.communicate()
+            raise Exception(f"The {self.wallet_name} wallet does not exist in the VegaWalletService. Stdout: {out}, Stderr: {err}")
 
 
-    def _wallet_args(self, command: tuple) -> tuple:
-        wallet_args = (
-            self.bin_path,
-            "wallet"
-        )
-        wallet_args = wallet_args + command
-        wallet_args = wallet_args + (
-            "--network",
-            self.network_name,
-            "--load-tokens",
-            "--automatic-consent",
-            "--tokens-passphrase-file",
-            self.passphrase_file,
-        )
-        
+    def _wallet_args(self, command: list[str], with_network: bool = False) -> list[str]:
+        wallet_args = self.bin_path + command
+        if with_network:
+            wallet_args = wallet_args + [
+                "--network",
+                self.network_name,
+                "--load-tokens",
+                "--automatic-consent",
+                "--tokens-passphrase-file",
+                self.passphrase_file,
+            ]
+        else:
+            wallet_args = wallet_args + [
+                "--passphrase-file",
+                self.passphrase_file,
+            ]
+            
         if not self.wallet_home is None:
-            wallet_args = wallet_args + ("--home", self.wallet_home, )
+            wallet_args = wallet_args + ["--home", self.wallet_home]
         
         return wallet_args
 
@@ -86,7 +101,7 @@ class VegaWalletService:
         if self.process != None:
             raise RuntimeError("Wallet is already running")
 
-        wallet_args = self._wallet_args(("service", "run")) + ("--no-version-check", )
+        wallet_args = self._wallet_args(["service", "run"], True) + ["--no-version-check"]
 
         self.process = subprocess.Popen(
             wallet_args,
@@ -128,9 +143,9 @@ def from_config(config: bots.config.types.WalletConfig) -> VegaWalletService:
     VegaWalletService.logger.info(f"Vegawallet will start with binary: {config.binary}")
 
     return VegaWalletService(
-        config.binary,
-        config.network_name,
-        config.passphrase_file,
-        config.home,
-        config.wallet_name
+        bin_path=config.binary,
+        network_name=config.network_name,
+        passphrase_file=config.passphrase_file,
+        wallet_home=config.home,
+        wallet_name=config.wallet_name
     )

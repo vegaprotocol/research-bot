@@ -1,35 +1,40 @@
 import os
 import logging
+import time
 import os.path
 import signal
 import argparse
 import multiprocessing
+import bots.flask.app
 
 from bots.services.multiprocessing import service_manager
 from bots.services.scenario import services_from_config
-from bots.services.healthcheck import from_config as healthcheck_from_config
-from bots.services.traders import from_config as traders_from_config
+from bots.flask.traders_handler import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
 from bots.vega_sim.wallet import from_config as market_sim_wallet_from_config
 from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
 from bots.tools.github import download_and_unzip_github_asset
-from bots.config.network import load_network_config
-from bots.config.config import read_config
+from bots.config.types import load_network_config, read_bots_config
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", default="./config.toml")
     args = parser.parse_args()
 
-    config = read_config(args.config)
+    config = read_bots_config(args.config)
     logging.basicConfig(level=logging.DEBUG if config.debug else logging.INFO)
-    network_config = load_network_config(config.network_config_file, config.devops_network_name, config.work_dir)
+    config.update_network_config(load_network_config(config.network_config_file, config.devops_network_name, config.work_dir))
+    bots.flask.app.configure_flask(config.debug)
+
 
     wallet_mutex = multiprocessing.Lock()
+    traders_svc = traders_from_config(config, wallet_mutex)
+    bots.flask.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
+
     scenarios_config = config.scenarios
 
-    rest_api_endpoints = network_config.api.rest.hosts
+    rest_api_endpoints = config.network_config.api.rest.hosts
     required_market_names = [scenarios_config[scenario_name]["market_name"] for scenario_name in scenarios_config]
     statistics = get_statistics(rest_api_endpoints)
 
@@ -59,8 +64,6 @@ def main():
         return
     
     services = [
-        healthcheck_from_config(config.http_server),
-        # traders_from_config(config.http_server),
         wallet_from_config(config.wallet),
     ]
 
@@ -73,12 +76,13 @@ def main():
     # )
 
     processes = service_manager(services)
+    # time.sleep(5)
+    # xxx = wallet.get_keypairs(config.wallet.wallet_name)
+    # print(xxx)
+    # signal.sigwait([signal.SIGINT, signal.SIGKILL,signal.SIGABRT, signal.SIGTERM, signal.SIGQUIT])
+    # logging.info("Program received stop signal")
 
-    xxx = wallet.get_keypairs(config.wallet.wallet_name)
-    print(xxx)
-    signal.sigwait([signal.SIGINT, signal.SIGKILL,signal.SIGABRT, signal.SIGTERM, signal.SIGQUIT])
-    logging.info("Program received stop signal")
-
+    bots.flask.app.app.run()
     for process in processes:
         process.kill()
     

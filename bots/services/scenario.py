@@ -31,6 +31,12 @@ class ScenarioService(Service):
         self.scenario = scenario
         self.logger = logging.getLogger(f"scenario-{name}")
 
+    def check(self):
+        pass
+
+    def wait(self):
+        pass
+
     @threaded
     def start(self):
         self.logger.info("Starting scenario")
