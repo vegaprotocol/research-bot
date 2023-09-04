@@ -51,6 +51,7 @@ init_wallet: check
 	
 	@echo "Generating the API TOKEN";
 	@$(WALLET_BIN) api-token generate \
+			--description "vegamarketsim" \
 			--home $(VEGA_WALLET_HOME) \
 			--wallet-name vegamarketsim \
 			--wallet-passphrase-file $(VEGA_WALLET_TOKENS_PASSPHRASE_FILE) \

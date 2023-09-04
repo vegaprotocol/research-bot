@@ -10,7 +10,7 @@ python = "^3.9,<3.12"
 # https://python-poetry.org/docs/dependency-specification/#git-dependencies
 vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", branch = "research-bots" }
 # vega_sim = { path = "../vega-market-sim", develop = true }
-
+flask = "^2.3.3"
 
 
 
