@@ -28,7 +28,10 @@ def check_market_exists(endpoints: list[str], market_names: list[str]):
 
 def get_statistics(endpoints: list[str]) -> dict[str, any]:
     for endpoint in endpoints:
-        json_resp = get_call(f"{endpoint}/statistics")
+        try:
+            json_resp = get_call(f"{endpoint}/statistics")
+        except:
+            continue
 
         if not "statistics" in json_resp:
             continue
@@ -39,7 +42,10 @@ def get_statistics(endpoints: list[str]) -> dict[str, any]:
 
 def get_assets(endpoints: list[str]) -> dict[str, any]:
     for endpoint in endpoints:
-        json_resp = get_call(f"{endpoint}/api/v2/assets")
+        try:
+             json_resp = get_call(f"{endpoint}/api/v2/assets")
+        except:
+            continue
 
         if not "assets" in json_resp:
             continue
