@@ -10,7 +10,8 @@ RUN apt-get update \
         wget \
         jq \
         make \
-        rsync
+        rsync \
+    && rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
 
 RUN  pip install "poetry==$POETRY_VERSION" \
     && mkdir /research-bots

@@ -75,7 +75,10 @@ def main():
 
     processes = service_manager(services)
 
-    bots.http.app.app.run()
+    try:
+        bots.http.app.run(config.debug, config.http_server)
+    except Exception as e:
+        logging.error("HTTP Server failed with error: " + str(e))
 
     for process in processes:
         process.kill()
