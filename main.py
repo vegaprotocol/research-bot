@@ -27,9 +27,6 @@ def main():
     bots.http.app.configure_flask(config.debug)
 
 
-    wallet_mutex = multiprocessing.Lock()
-    traders_svc = traders_from_config(config, wallet_mutex)
-    bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
 
     scenarios_config = config.scenarios
 
@@ -51,10 +48,15 @@ def main():
     except Exception as e:
         logging.error(str(e))
         return
+        
+    wallet_mutex = multiprocessing.Lock()
 
     try:
         check_env_variables()
         check_market_exists(rest_api_endpoints, required_market_names)
+        
+        traders_svc = traders_from_config(config, wallet_mutex)
+        bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
     except Exception as e:
         logging.error(str(e))
         return

@@ -97,5 +97,8 @@ prepare_wallet: init_wallet
 prepare_bots:
 	@poetry install
 
+prepare_bots_prod:
+	@poetry install --no-dev
+
 run_bots: prepare_bots
 	poetry run python main.py --config "$(CONFIG_FILE)"

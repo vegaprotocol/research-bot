@@ -22,6 +22,7 @@ def configure_flask(debug: bool):
     app.config['FLASK_APP'] = "research-bots"
 
 @app.route("/health")
+@app.route("/status")
 def health_check():
     return "OK"
 

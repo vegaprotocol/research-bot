@@ -258,7 +258,7 @@ def read_bots_config(path: str) -> BotsConfig:
     config_json = None
     if is_valid_url(path):
         config_json =  read_config_from_url(path)
-
-    config_json = read_config_from_file(path)
+    else: 
+        config_json = read_config_from_file(path)
 
     return config_from_json(config_json)
