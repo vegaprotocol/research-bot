@@ -46,8 +46,8 @@ def main():
                 config.wallet.repository,
             )
             # We uses vegawallet from the vega binary
-            if config.wallet.artifact_name == "vega":
-                binary_path = [binary_path, "wallet"]
+            # if config.wallet.artifact_name == "vega":
+            #     binary_path = [binary_path, "wallet"]
 
             config.wallet.update_binary(binary_path)
     except Exception as e:

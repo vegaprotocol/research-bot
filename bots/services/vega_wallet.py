@@ -61,7 +61,7 @@ class VegaWalletService(Service):
         
         # add check for free port
 
-        wallet_args = self._wallet_args(["key", "list", "--wallet", self.wallet_name])
+        wallet_args = self._wallet_args(["wallet", "key", "list", "--wallet", self.wallet_name])
         print(wallet_args)
         process = subprocess.Popen(wallet_args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         process.wait()
@@ -101,7 +101,7 @@ class VegaWalletService(Service):
         if self.process != None:
             raise RuntimeError("Wallet is already running")
 
-        wallet_args = self._wallet_args(["service", "run"], True) + ["--no-version-check"]
+        wallet_args = self._wallet_args(["wallet", "service", "run"], True) + ["--no-version-check"]
 
         self.process = subprocess.Popen(
             wallet_args,
