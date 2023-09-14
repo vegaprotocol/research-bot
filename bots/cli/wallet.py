@@ -1,39 +1,194 @@
 import bots.config.types
 import subprocess
+import json
+import logging
+import os.path
 
+class VegaWallet:
+    def __init__(self, wallet_config: bots.config.types.WalletConfig):
+        self._wallet_config = wallet_config
 
-# @$(WALLET_BIN) api-token generate \
-#         --description "vegamarketsim" \
-#         --home $(VEGA_WALLET_HOME) \
-#         --wallet-name vegamarketsim \
-#         --wallet-passphrase-file $(VEGA_WALLET_TOKENS_PASSPHRASE_FILE) \
-#         --tokens-passphrase-file $(VEGA_WALLET_TOKENS_PASSPHRASE_FILE) \
-#         --output=json > $(BOTS_WORKING_DIR)/api-token-generate.json
+    def _exec(self, args) -> dict:
+        if len(self._wallet_config.home) > 0:
+            args = args + [
+                "--home", self._wallet_config.home,
+            ]
 
-def generate_wallet_token(wallet_name: str, wallet_config: bots.config.types.WalletConfig) -> str:
-    args = [
-        wallet_config.binary,
-        "--description", wallet_name,
-        "--wallet-name", wallet_name,
-        "--wallet-passphrase-file", wallet_config.passphrase_file,
-        "--tokens-passphrase-file", wallet_config.passphrase_file,
-        "--output=json"
-    ]
-
-    if len(wallet_config.home) > 0:
         args = args + [
-            "--home", wallet_config.home,
+            "--output", "json"
         ]
 
-    with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
-        print(proc.stdout.read())
+        with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+            err = proc.stderr.read()
+            out = proc.stdout.read()
+            if len(err) > 0:
+                logging.error(err)
+                raise RuntimeError(err)
+            
+            if len(out) < 1:
+                return {}
+            
+            return json.loads(out)
+        
+    def _update_token_file(self, wallet_name: str, token: str):
+        tokens = {}
+        if os.path.exists(self._wallet_config.tokens_file):
+            with open(self._wallet_config.tokens_file, "r") as file:
+                tokens = json.load(file)
 
+        tokens[wallet_name] = token
 
-def list_keys_for_wallet(wallet_name: str, wallet_config: bots.config.types.WalletConfig):
-    pass
+        json_object = json.dumps(tokens, indent=4)
+        
+        with open(self._wallet_config.tokens_file, "w+") as outfile:
+            outfile.write(json_object)
 
-def create_key(wallet_name: str, key_name: str, wallet_config: bots.config.types.WalletConfig): 
-    pass
+    def is_initialized(self) -> bool:
+        wallets = self.list_wallets()
 
-def create_wallet(wallet_name: str, wallet_config: bots.config.types.WalletConfig):
-    pass
+        return len(wallets) > 0
+
+    def init(self):
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "init",
+        ]
+
+        self._exec(args)
+
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "api-token",
+            "init",
+            "--passphrase-file", self._wallet_config.passphrase_file,
+        ]
+
+        self._exec(args)
+
+        self.create_wallet("default")
+
+    def generate_api_token(self, wallet_name: str) -> str:
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "api-token",
+            "generate",
+            "--description", wallet_name,
+            "--wallet-name", wallet_name,
+            "--wallet-passphrase-file", self._wallet_config.passphrase_file,
+            "--tokens-passphrase-file", self._wallet_config.passphrase_file,
+        ]
+
+        resp = self._exec(args)
+
+        if not "token" in resp:
+            raise RuntimeError("Invalid api-token generate response")
+        
+        self._update_token_file(wallet_name, resp["token"])
+
+        return resp
+       
+    def list_wallets(self) -> list:
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "list"
+        ]
+        
+        resp = self._exec(args)
+        if not "wallets" in resp:
+            return []
+
+        return [ wallet for wallet in resp["wallets"] ]
+
+    def wallet_exists(self, wallet_name: str) -> bool:
+        wallets = self.list_wallets()
+
+        return wallet_name in wallets
+
+    def list_keys(self, wallet_name: str) -> str:
+        wallets = self.list_wallets()
+
+        if not wallet_name in wallets:
+            raise RuntimeError(f"Wallet {wallet_name} does not exist")
+
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "key",
+            "list",
+            "--wallet", wallet_name,
+            "--passphrase-file", self._wallet_config.passphrase_file,
+        ]
+
+        resp = self._exec(args)
+
+        if "keys" not in resp:
+            return {}
+        
+        return { key["name"]: key["publicKey"] for key in resp["keys"] }
+
+    def create_wallet(self, wallet_name: str): 
+        wallets = self.list_wallets()
+
+        if wallet_name in wallets:
+            raise RuntimeError(f"Wallet {wallet_name} already exists")
+
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "create",
+            "--wallet", wallet_name,
+            "--passphrase-file", self._wallet_config.passphrase_file,
+        ]
+
+        resp = self._exec(args)
+
+        if not "wallet" in resp:
+            raise RuntimeError("Invalid response from create_wallet command")
+        
+        return resp["wallet"]
+
+    def generate_key(self, wallet_name: str, key_name: str):
+        wallets = self.list_wallets()
+
+        if not wallet_name in wallets:
+            raise RuntimeError(f"Wallet {wallet_name} does not exist")
+        
+        keys = self.list_keys(wallet_name)
+
+        if key_name in keys:
+            raise RuntimeError(f"Key {key_name} already exists for wallet {wallet_name}")
+        
+        args = [
+            self._wallet_config.binary,
+            "wallet",
+            "key",
+            "generate",
+            "--meta", f"name:{key_name}",
+            "--wallet", wallet_name,
+            "--passphrase-file", self._wallet_config.passphrase_file,
+        ]
+
+        return self._exec(args)
+    
+    def import_internal_networks(self):
+        networks = [
+            "https://raw.githubusercontent.com/vegaprotocol/networks-internal/main/stagnet1/vegawallet-stagnet1.toml",
+            "https://raw.githubusercontent.com/vegaprotocol/networks-internal/main/mainnet-mirror/vegawallet-mainnet-mirror.toml",
+            "https://raw.githubusercontent.com/vegaprotocol/networks-internal/main/fairground/vegawallet-fairground.toml",
+            "https://raw.githubusercontent.com/vegaprotocol/networks-internal/main/devnet1/vegawallet-devnet1.toml",
+        ]
+
+        for network in networks:
+            args = [
+                self._wallet_config.binary,
+                "wallet",
+                "network",
+                "import",
+                "--from-url", network,
+            ]
+
+            self._exec(args)

@@ -61,13 +61,13 @@ class VegaWalletService(Service):
         
         # add check for free port
 
-        wallet_args = self._wallet_args(["wallet", "key", "list", "--wallet", self.wallet_name])
-        print(wallet_args)
-        process = subprocess.Popen(wallet_args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        process.wait()
-        if process.poll() != 0:
-            out, err = process.communicate()
-            raise Exception(f"The {self.wallet_name} wallet does not exist in the VegaWalletService. Stdout: {out}, Stderr: {err}")
+        # wallet_args = self._wallet_args(["wallet", "key", "list", "--wallet", self.wallet_name])
+        # print(wallet_args)
+        # process = subprocess.Popen(wallet_args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # process.wait()
+        # if process.poll() != 0:
+        #     out, err = process.communicate()
+        #     raise Exception(f"The {self.wallet_name} wallet does not exist in the VegaWalletService. Stdout: {out}, Stderr: {err}")
 
 
     def _wallet_args(self, command: list[str], with_network: bool = False) -> list[str]:

@@ -15,6 +15,7 @@ from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
 from bots.tools.github import download_and_unzip_github_asset
 from bots.config.types import load_network_config, read_bots_config
+from bots.cli.wallet import VegaWallet as VegawalletCli
 
 def main():
     parser = argparse.ArgumentParser()
@@ -26,7 +27,11 @@ def main():
     config.update_network_config(load_network_config(config.network_config_file, config.devops_network_name, config.work_dir))
     bots.http.app.configure_flask(config.debug)
 
-
+    # before the wallet http server is started we need to use the CLI
+    cli_wallet = VegawalletCli(config.wallet)
+    if not cli_wallet.is_initialized():
+        cli_wallet.init()
+        cli_wallet.import_internal_networks()
 
     scenarios_config = config.scenarios
 
@@ -34,6 +39,8 @@ def main():
     required_market_names = [scenarios_config[scenario_name].market_name for scenario_name in scenarios_config]
     statistics = get_statistics(rest_api_endpoints)
 
+    wallet_mutex = multiprocessing.Lock()
+    
     try:
         if config.wallet.download_wallet_binary:
             binary_path = download_and_unzip_github_asset(
@@ -48,15 +55,14 @@ def main():
     except Exception as e:
         logging.error(str(e))
         return
-        
-    wallet_mutex = multiprocessing.Lock()
+
     scenario_wallets = dict()
     try:
         wallet_svc = vega_sim_wallet_from_config(config.wallet, wallet_mutex)
 
         check_env_variables()
         check_market_exists(rest_api_endpoints, required_market_names)
-        scenario_wallets = scenario_wallet_from_config(config.scenarios, wallet_svc)
+        scenario_wallets = scenario_wallet_from_config(config.scenarios, cli_wallet)
         traders_svc = traders_from_config(config, wallet_svc, scenario_wallets)
         bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
     except Exception as e:

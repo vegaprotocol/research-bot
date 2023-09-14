@@ -2,9 +2,10 @@ import bots.config.types
 import logging
 
 from vega_sim.devops.wallet import ScenarioWallet, Agent
+from bots.cli.wallet import VegaWallet as VegawalletCli
 
 
-def from_config(scenarios_config: bots.config.types.ScenariosConfigType, wallet_config: bots.config.types.WalletConfig) -> dict[str, ScenarioWallet]:
+def from_config(scenarios_config: bots.config.types.ScenariosConfigType, wallet_cli: VegawalletCli) -> dict[str, ScenarioWallet]:
     result = dict()
     for scenario_name in scenarios_config:
         result.update({f"{scenario_name}": ScenarioWallet(
@@ -21,42 +22,52 @@ def from_config(scenarios_config: bots.config.types.ScenariosConfigType, wallet_
     for scenario_name in result:
         scenario_wallet = result[scenario_name]
 
-        existing_key_pairs = None
-        try:
-            existing_key_pairs = wallet_svc.get_keypairs(scenario_wallet.market_creator_agent.wallet_name)
-        except:
-            logging.info(f"Wallet {scenario_wallet.market_creator_agent.wallet_name} does not exist")
+        wallet_name = scenario_wallet.market_creator_agent.wallet_name
         
-        if existing_key_pairs is None:
+        wallet_keys = {}
+
+        if not wallet_cli.wallet_exists(wallet_name):
             logging.info(f"Creating the {scenario_wallet.market_creator_agent.wallet_name} wallet")
-            wallet_svc.create_wallet(scenario_wallet.market_creator_agent.wallet_name)
+            wallet_cli.create_wallet(wallet_name)
+            wallet_cli.generate_api_token(wallet_name)
             existing_key_pairs = dict()
+        else:
+            wallet_keys = wallet_cli.list_keys(wallet_name)
 
-        if not scenario_wallet.market_creator_agent.key_name in existing_key_pairs:
+        if not scenario_wallet.market_creator_agent.key_name in wallet_keys:
             logging.info(f"Creating the {scenario_wallet.market_creator_agent.key_name} key pair in the {scenario_wallet.market_creator_agent.wallet_name} wallet")
-            wallet_svc.create_key(scenario_wallet.market_creator_agent.key_name, scenario_wallet.market_creator_agent.wallet_name)
+            wallet_cli.generate_key(
+                scenario_wallet.market_creator_agent.wallet_name, 
+                scenario_wallet.market_creator_agent.key_name
+            )
 
-        if not scenario_wallet.market_settler_agent.key_name in existing_key_pairs:
+        if not scenario_wallet.market_settler_agent.key_name in wallet_keys:
             logging.info(f"Creating the {scenario_wallet.market_settler_agent.key_name} key pair in the {scenario_wallet.market_settler_agent.wallet_name} wallet")
-            wallet_svc.create_key(scenario_wallet.market_settler_agent.key_name, scenario_wallet.market_settler_agent.wallet_name)
+            wallet_cli.generate_key(
+                scenario_wallet.market_settler_agent.wallet_name,
+                scenario_wallet.market_settler_agent.key_name
+            )
 
-        if not scenario_wallet.market_maker_agent.key_name in existing_key_pairs:
+        if not scenario_wallet.market_maker_agent.key_name in wallet_keys:
             logging.info(f"Creating the {scenario_wallet.market_maker_agent.key_name} key pair in the {scenario_wallet.market_maker_agent.wallet_name} wallet")
-            wallet_svc.create_key(scenario_wallet.market_maker_agent.key_name, scenario_wallet.market_maker_agent.wallet_name)
+            wallet_cli.generate_key(
+                scenario_wallet.market_maker_agent.wallet_name,
+                scenario_wallet.market_maker_agent.key_name
+            )
 
         for agent in scenario_wallet.auction_trader_agents:
-            if not agent.key_name in existing_key_pairs:
+            if not agent.key_name in wallet_keys:
                 logging.info(f"Creating the {agent.key_name} key pair in the {agent.wallet_name} wallet")
-                wallet_svc.create_key(agent.key_name, agent.wallet_name)
+                wallet_cli.generate_key(agent.wallet_name, agent.key_name)
 
         for agent in scenario_wallet.random_trader_agents:
-            if not agent.key_name in existing_key_pairs:
+            if not agent.key_name in wallet_keys:
                 logging.info(f"Creating the {agent.key_name} key pair in the {agent.wallet_name} wallet")
-                wallet_svc.create_key(agent.key_name, agent.wallet_name)
+                wallet_cli.generate_key(agent.wallet_name, agent.key_name)
 
         for agent in scenario_wallet.sensitive_trader_agents:
-            if not agent.key_name in existing_key_pairs:
+            if not agent.key_name in wallet_keys:
                 logging.info(f"Creating the {agent.key_name} key pair in the {agent.wallet_name} wallet")
-                wallet_svc.create_key(agent.key_name, agent.wallet_name)
+                wallet_cli.generate_key(agent.wallet_name, agent.key_name)
 
     return result

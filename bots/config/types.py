@@ -83,6 +83,8 @@ class WalletConfig:
     passphrase_file: str
     # Wallet URL
     wallet_url: str
+    # Tokens file
+    tokens_file: str
 
     def update_binary(self, binary_override: str | list[str]):
         self.binary = binary_override
@@ -297,7 +299,8 @@ def wallet_config_from_json(json: dict[str, any]) -> WalletConfig:
         binary=json.get("binary", "vegawallet"),
         home=wallet_home,
         passphrase_file=passphrase_file,
-        wallet_url=json.get("wallet_url", "http://127.0.0.1:1789")
+        wallet_url=json.get("wallet_url", "http://127.0.0.1:1789"),
+        tokens_file=json.get("tokens_file", "./network/wallet-info.json")
     )
 
 def http_server_config_from_json(json: dict[str, any]) -> HttpServerConfig:

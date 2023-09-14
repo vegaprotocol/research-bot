@@ -53,7 +53,7 @@ class ScenarioService(Service):
             network=Network[self.network],
             pause_at_completion=False,
             raise_datanode_errors=False,
-            raise_step_errors=False,
+            raise_step_errors=True,
             run_with_snitch=False,
         )
         self.running = False
@@ -108,7 +108,7 @@ def _scenarios_from_config(config: bots.config.types.ScenariosConfigType, scenar
                 order_spacing=config[scenario_name].market_maker.order_spacing,
                 order_clipping=config[scenario_name].market_maker.order_clipping,
                 inventory_lower_boundary=config[scenario_name].market_maker.inventory_lower_boundary,
-                inventory_upper_boundary=config[scenario_name].market_maker.inventory_lower_boundary,
+                inventory_upper_boundary=config[scenario_name].market_maker.inventory_upper_boundary,
                 fee_amount=config[scenario_name].market_maker.fee_amount,
                 commitment_amount=config[scenario_name].market_maker.commitment_amount,
                 initial_mint=config[scenario_name].market_maker.initial_mint,
