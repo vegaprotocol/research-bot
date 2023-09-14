@@ -10,6 +10,7 @@ from vega_sim.scenario.constants import Network
 from vega_sim.devops.scenario import DevOpsScenario
 from vega_sim.network_service import VegaServiceNetwork
 
+from vega_sim.devops.wallet import ScenarioWallet
 from vega_sim.devops.scenario import DevOpsScenario
 from vega_sim.devops.classes import (
     MarketMakerArgs,
@@ -45,8 +46,8 @@ class ScenarioService(Service):
         self.logger.info("Starting scenario")
 
         self.running = True
-        self.scenario.market_name = self.scenario_config.get("market_name", "missing-market-name")
-        self.scenario.step_length_seconds = self.scenario_config.get("step_length_seconds", 10)
+        self.scenario.market_name = self.scenario_config.market_name
+        self.scenario.step_length_seconds = self.scenario_config.step_length_seconds
         self.scenario.run_iteration(
             vega=self.vega,
             network=Network[self.network],
@@ -58,11 +59,18 @@ class ScenarioService(Service):
         self.running = False
 
 
-def services_from_config(vega_sim_network_name: str, scenarios_config: bots.config.types.ScenariosConfigType, network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> list[Service]:
+def services_from_config(
+    vega_sim_network_name: str, 
+    scenarios_wallets: dict[str, ScenarioWallet],
+    scenarios_config: bots.config.types.ScenariosConfigType, 
+    network_config_path: str, 
+    wallet_binary: str, 
+    wallet_mutex: multiprocessing.Lock,
+) -> list[Service]:
     if scenarios_config is None or len(scenarios_config) < 1:
         raise ValueError("Cannot create services because scenarios are none")
     
-    scenarios = _scenarios_from_config(scenarios_config)
+    scenarios = _scenarios_from_config(scenarios_config, scenarios_wallets)
 
     services = []
 
@@ -77,19 +85,10 @@ def services_from_config(vega_sim_network_name: str, scenarios_config: bots.conf
     return services
 
 
-def _scenarios_from_config(config: bots.config.types.ScenariosConfigType) -> dict[str, DevOpsScenario]:
+def _scenarios_from_config(config: bots.config.types.ScenariosConfigType, scenarios_wallets: dict[str, ScenarioWallet]) -> dict[str, DevOpsScenario]:
     result = {}
 
     for scenario_name in config:
-    #     market_manager_args = config[scenario_name].get("market_manager_args", {})
-    #     market_maker_args = config[scenario_name].get("market_maker_args", {})
-    #     auction_trader_args = config[scenario_name].get("auction_trader_args", {})
-    #     random_trader_args = config[scenario_name].get("random_trader_args", {})
-    #     sensitive_trader_args = config[scenario_name].get("sensitive_trader_args", {})
-    #     simulation_args = config[scenario_name].get("simulation_args", {})
-
-    #     missing = lambda key: f"missing-{key}-for-{scenario_name}"
-
         result.update({f"{scenario_name}": DevOpsScenario(
             binance_code=config[scenario_name].binance_code,
             market_manager_args=MarketManagerArgs(
@@ -136,6 +135,7 @@ def _scenarios_from_config(config: bots.config.types.ScenariosConfigType) -> dic
                 start_date=config[scenario_name].simulation.start_date,
                 randomise_history=config[scenario_name].simulation.randomise_history,
             ),
+            scenario_wallet=scenarios_wallets[scenario_name] if scenario_name in scenarios_wallets else None,
         )
     })
 
