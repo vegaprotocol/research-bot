@@ -2,9 +2,9 @@ import bots.config.types
 import logging
 
 from vega_sim.devops.wallet import ScenarioWallet, Agent
-from vega_sim.wallet.vega_wallet import VegaWallet
 
-def from_config(scenarios_config: bots.config.types.ScenariosConfigType, wallet_svc: VegaWallet) -> dict[str, ScenarioWallet]:
+
+def from_config(scenarios_config: bots.config.types.ScenariosConfigType, wallet_config: bots.config.types.WalletConfig) -> dict[str, ScenarioWallet]:
     result = dict()
     for scenario_name in scenarios_config:
         result.update({f"{scenario_name}": ScenarioWallet(

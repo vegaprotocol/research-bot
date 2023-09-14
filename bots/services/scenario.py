@@ -64,7 +64,7 @@ def services_from_config(
     scenarios_wallets: dict[str, ScenarioWallet],
     scenarios_config: bots.config.types.ScenariosConfigType, 
     network_config_path: str, 
-    wallet_binary: str, 
+    wallet_config: bots.config.types.WalletConfig, 
     wallet_mutex: multiprocessing.Lock,
 ) -> list[Service]:
     if scenarios_config is None or len(scenarios_config) < 1:
@@ -78,7 +78,7 @@ def services_from_config(
         services.append(ScenarioService(
             scenario_name, 
             scenarios_config[scenario_name], 
-            network_from_devops_network_name(vega_sim_network_name, network_config_path, wallet_binary, wallet_mutex), 
+            network_from_devops_network_name(vega_sim_network_name, wallet_config.home, network_config_path, wallet_config.binary, wallet_mutex), 
             vega_sim_network_name, 
             scenarios[scenario_name]))
 

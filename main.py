@@ -72,7 +72,7 @@ def main():
         scenario_wallets,
         scenarios_config, 
         os.path.dirname(config.network_config.file_path), 
-        config.wallet.binary, 
+        config.wallet, 
         wallet_mutex
     )
 
