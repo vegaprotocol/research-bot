@@ -39,7 +39,7 @@ def main():
     required_market_names = [scenarios_config[scenario_name].market_name for scenario_name in scenarios_config]
     statistics = get_statistics(rest_api_endpoints)
 
-    wallet_mutex = multiprocessing.Lock()
+    wallet_mutex = None
     
     try:
         if config.wallet.download_wallet_binary:

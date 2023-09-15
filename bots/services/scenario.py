@@ -53,7 +53,7 @@ class ScenarioService(Service):
             network=Network[self.network],
             pause_at_completion=False,
             raise_datanode_errors=False,
-            raise_step_errors=True,
+            raise_step_errors=False,
             run_with_snitch=False,
         )
         self.running = False

@@ -112,7 +112,7 @@ class ScenarioMarketMakerConfig:
     order_kappa: float
     order_size: int
     order_levels: int
-    order_spacing: int
+    order_spacing: float
     order_clipping: int
     inventory_lower_boundary: int
     inventory_upper_boundary: int
@@ -212,7 +212,7 @@ def scenario_market_maker_config_from_json(json: dict[str, any]) -> ScenarioMark
         order_kappa = float(json.get("order_kappa", 0.15)),
         order_size = int(json.get("order_size", 1)),
         order_levels = int(json.get("order_levels", 25)),
-        order_spacing = int(json.get("order_spacing", 1)),
+        order_spacing = float(json.get("order_spacing", 1)),
         order_clipping = int(json.get("order_clipping", 10000)),
         inventory_lower_boundary = int(json.get("inventory_lower_boundary", -3)),
         inventory_upper_boundary = int(json.get("inventory_upper_boundary", 3)),
@@ -269,14 +269,6 @@ def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
         sensitive_trader = scenario_sensitive_trader_config_from_json(json.get("sensitive_trader_args", [])),
         simulation = scenario_simulation_config_from_json(json.get("simulation_args", {})),
     )
-
-
-        # market_manager_args = config[scenario_name].get("market_manager_args", {})
-        # market_maker_args = config[scenario_name].get("market_maker_args", {})
-        # auction_trader_args = config[scenario_name].get("auction_trader_args", {})
-        # random_trader_args = config[scenario_name].get("random_trader_args", {})
-        # sensitive_trader_args = config[scenario_name].get("sensitive_trader_args", {})
-        # simulation_args = config[scenario_name].get("simulation_args", {})
 
 
 def wallet_config_from_json(json: dict[str, any]) -> WalletConfig:
