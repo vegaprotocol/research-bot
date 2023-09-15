@@ -58,7 +58,7 @@ class Traders(Handler):
 
     def serve(self):
         resp = self._cached_response()
-        if self.response_cache is None:
+        if resp is None:
             Traders.logger.info("Refreshing cache for traders response")
             with self.cache_lock:
                 self.response_cache = self.prepare_response()

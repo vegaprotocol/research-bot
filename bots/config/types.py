@@ -223,7 +223,7 @@ def scenario_market_maker_config_from_json(json: dict[str, any]) -> ScenarioMark
 
 def scenario_auction_trader_config_from_json(json: dict[str, any]) -> ScenarioAuctionTraderConfig:
     return ScenarioAuctionTraderConfig(
-        traders = int(json.get("traders", 1)),
+        traders = int(json.get("traders", 2)),
         initial_volume = float(json.get("initial_volume", 0.001)),
         initial_mint = int(json.get("initial_mint", 10000)),
     )
