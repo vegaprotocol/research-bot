@@ -10,6 +10,7 @@ from vega_sim.scenario.constants import Network
 from vega_sim.devops.scenario import DevOpsScenario
 from vega_sim.network_service import VegaServiceNetwork
 
+from vega_sim.devops.wallet import ScenarioWallet
 from vega_sim.devops.scenario import DevOpsScenario
 from vega_sim.devops.classes import (
     MarketMakerArgs,
@@ -30,9 +31,12 @@ class ScenarioService(Service):
         self.network = network
         self.scenario = scenario
         self.logger = logging.getLogger(f"scenario-{name}")
+        self.running = False
 
     def check(self):
-        pass
+        self.logger.info("Checking if all required wallet exists for scenario")
+        # TBD
+
 
     def wait(self):
         pass
@@ -40,8 +44,10 @@ class ScenarioService(Service):
     @threaded
     def start(self):
         self.logger.info("Starting scenario")
-        self.scenario.market_name = self.scenario_config.get("market_name", "missing-market-name")
-        self.scenario.step_length_seconds = self.scenario_config.get("step_length_seconds", 10)
+
+        self.running = True
+        self.scenario.market_name = self.scenario_config.market_name
+        self.scenario.step_length_seconds = self.scenario_config.step_length_seconds
         self.scenario.run_iteration(
             vega=self.vega,
             network=Network[self.network],
@@ -50,13 +56,21 @@ class ScenarioService(Service):
             raise_step_errors=False,
             run_with_snitch=False,
         )
+        self.running = False
 
 
-def services_from_config(vega_sim_network_name: str, scenarios_config: bots.config.types.ScenariosConfigType, network_config_path: str, wallet_binary: str, wallet_mutex: multiprocessing.Lock) -> list[Service]:
+def services_from_config(
+    vega_sim_network_name: str, 
+    scenarios_wallets: dict[str, ScenarioWallet],
+    scenarios_config: bots.config.types.ScenariosConfigType, 
+    network_config_path: str, 
+    wallet_config: bots.config.types.WalletConfig, 
+    wallet_mutex: multiprocessing.Lock,
+) -> list[Service]:
     if scenarios_config is None or len(scenarios_config) < 1:
         raise ValueError("Cannot create services because scenarios are none")
     
-    scenarios = _scenarios_from_config(scenarios_config)
+    scenarios = _scenarios_from_config(scenarios_config, scenarios_wallets)
 
     services = []
 
@@ -64,73 +78,64 @@ def services_from_config(vega_sim_network_name: str, scenarios_config: bots.conf
         services.append(ScenarioService(
             scenario_name, 
             scenarios_config[scenario_name], 
-            network_from_devops_network_name(vega_sim_network_name, network_config_path, wallet_binary, wallet_mutex), 
+            network_from_devops_network_name(vega_sim_network_name, wallet_config.home, network_config_path, wallet_config.binary, wallet_mutex), 
             vega_sim_network_name, 
             scenarios[scenario_name]))
 
     return services
 
 
-def _scenarios_from_config(config: bots.config.types.ScenariosConfigType) -> dict[str, DevOpsScenario]:
+def _scenarios_from_config(config: bots.config.types.ScenariosConfigType, scenarios_wallets: dict[str, ScenarioWallet]) -> dict[str, DevOpsScenario]:
     result = {}
 
     for scenario_name in config:
-        market_manager_args = config[scenario_name].get("market_manager_args", {})
-        market_maker_args = config[scenario_name].get("market_maker_args", {})
-        auction_trader_args = config[scenario_name].get("auction_trader_args", {})
-        random_trader_args = config[scenario_name].get("random_trader_args", {})
-        sensitive_trader_args = config[scenario_name].get("sensitive_trader_args", {})
-        simulation_args = config[scenario_name].get("simulation_args", {})
-
-        missing = lambda key: f"missing-{key}-for-{scenario_name}"
-
-
         result.update({f"{scenario_name}": DevOpsScenario(
-            binance_code=config[scenario_name].get("biance_code", missing("biance-code")),
+            binance_code=config[scenario_name].binance_code,
             market_manager_args=MarketManagerArgs(
-                market_name=str(market_manager_args.get("market_name", missing("market-name"))),
-                market_code=str(market_manager_args.get("market_name", missing("market-code"))),
-                asset_name=str(market_manager_args.get("asset_name", missing("asset-name"))),
-                adp=int(market_manager_args.get("adp", missing("adp"))),
-                mdp=int(market_manager_args.get("mdp", missing("mdp"))),
-                pdp=int(market_manager_args.get("pdp", missing("pdp"))),
+                market_name=config[scenario_name].market_name,
+                market_code=config[scenario_name].market_code,
+                asset_name=config[scenario_name].market_manager.asset_name,
+                adp=config[scenario_name].market_manager.adp,
+                mdp=config[scenario_name].market_manager.mdp,
+                pdp=config[scenario_name].market_manager.pdp,
             ),
             market_maker_args=MarketMakerArgs(
-                market_kappa=float(market_maker_args.get("market_kappa", missing("market_kappa"))),
-                market_order_arrival_rate=int(market_maker_args.get("market_order_arrival_rate", missing("market_order_arrival_rate"))),
-                order_kappa=float(market_maker_args.get("order_kappa", missing("order_kappa"))),
-                order_size=int(market_maker_args.get("order_size", missing("order_size"))),
-                order_levels=int(market_maker_args.get("order_levels", missing("order_levels"))),
-                order_spacing=float(market_maker_args.get("order_spacing", missing("order_spacing"))),
-                order_clipping=int(market_maker_args.get("order_clipping", missing("order_clipping"))),
-                inventory_lower_boundary=int(market_maker_args.get("inventory_lower_boundary", missing("inventory_lower_boundary"))),
-                inventory_upper_boundary=int(market_maker_args.get("inventory_upper_boundary", missing("inventory_upper_boundary"))),
-                fee_amount=float(market_maker_args.get("fee_amount", missing("fee_amount"))),
-                commitment_amount=int(market_maker_args.get("commitment_amount", missing("commitment_amount"))),
-                initial_mint=int(market_maker_args.get("initial_mint", missing("initial_mint"))),
+                market_kappa=config[scenario_name].market_maker.market_kappa,
+                market_order_arrival_rate=config[scenario_name].market_maker.market_order_arrival_rate,
+                order_kappa=config[scenario_name].market_maker.order_kappa,
+                order_size=config[scenario_name].market_maker.order_size,
+                order_levels=config[scenario_name].market_maker.order_levels,
+                order_spacing=config[scenario_name].market_maker.order_spacing,
+                order_clipping=config[scenario_name].market_maker.order_clipping,
+                inventory_lower_boundary=config[scenario_name].market_maker.inventory_lower_boundary,
+                inventory_upper_boundary=config[scenario_name].market_maker.inventory_upper_boundary,
+                fee_amount=config[scenario_name].market_maker.fee_amount,
+                commitment_amount=config[scenario_name].market_maker.commitment_amount,
+                initial_mint=config[scenario_name].market_maker.initial_mint,
             ),
             auction_trader_args=AuctionTraderArgs(
-                initial_volume=float(auction_trader_args.get("initial_volume", missing("initial_volume"))),
-                initial_mint=int(auction_trader_args.get("initial_mint", missing("initial_mint"))),
+                initial_volume=config[scenario_name].auction_trader.initial_volume,
+                initial_mint=config[scenario_name].auction_trader.initial_mint,
             ),
             random_trader_args=RandomTraderArgs(
-                order_intensity=[int(val) for val in random_trader_args.get("order_intensity", [])],
-                order_volume=[float(val) for val in random_trader_args.get("order_volume", [])],
-                step_bias=[float(val) for val in random_trader_args.get("step_bias", [])],
-                initial_mint=int(random_trader_args.get("initial_mint", missing("initial_mint"))),
+                order_intensity=config[scenario_name].random_trader.order_intensity,
+                order_volume=config[scenario_name].random_trader.order_volume,
+                step_bias=config[scenario_name].random_trader.step_bias,
+                initial_mint=config[scenario_name].random_trader.initial_mint
             ),
             sensitive_trader_args=SensitiveTraderArgs(
-                scale=[int(val) for val in sensitive_trader_args.get("scale", [])],
-                max_order_size=[float(val) for val in sensitive_trader_args.get("max_order_size", [])],
-                initial_mint=int(sensitive_trader_args.get("initial_mint", missing("initial_mint"))),
+                scale=config[scenario_name].sensitive_trader.scale,
+                max_order_size=config[scenario_name].sensitive_trader.max_order_size,
+                initial_mint=config[scenario_name].sensitive_trader.initial_mint,
             ),
             simulation_args=SimulationArgs(
-                n_steps=int(simulation_args.get("n_steps", missing("n_steps"))),
-                granularity=_dispatch_granularity(simulation_args.get("granularity", "MINUTE")),
-                coinbase_code=str(simulation_args.get("coinbase_code", missing("coinbase_code"))),
-                start_date=str(simulation_args.get("start_date", missing("start_date"))),
-                randomise_history=_dispatch_bool(simulation_args.get("randomise_history", False)),
+                n_steps=config[scenario_name].simulation.n_steps,
+                granularity=_dispatch_granularity(config[scenario_name].simulation.granularity),
+                coinbase_code=config[scenario_name].simulation.coinbase_code,
+                start_date=config[scenario_name].simulation.start_date,
+                randomise_history=config[scenario_name].simulation.randomise_history,
             ),
+            scenario_wallet=scenarios_wallets[scenario_name] if scenario_name in scenarios_wallets else None,
         )
     })
 

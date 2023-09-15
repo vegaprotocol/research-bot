@@ -1,6 +1,9 @@
 import requests
 import logging
+import bots.api.types
 
+
+from typing import Optional
 from bots.api.http import get_call
 
 def get_markets(endpoints: list[str]) -> any:
@@ -43,7 +46,7 @@ def get_statistics(endpoints: list[str]) -> dict[str, any]:
 def get_assets(endpoints: list[str]) -> dict[str, any]:
     for endpoint in endpoints:
         try:
-             json_resp = get_call(f"{endpoint}/api/v2/assets")
+            json_resp = get_call(f"{endpoint}/api/v2/assets")
         except:
             continue
 
@@ -53,3 +56,53 @@ def get_assets(endpoints: list[str]) -> dict[str, any]:
         return [ asset["node"] for asset in json_resp["assets"]["edges"] ]
 
     raise requests.RequestException("all endpoints for /statistics did not return a valid response")
+
+def get_accounts(
+        endpoints: list[str], 
+        asset_id: Optional[str] = None, 
+        parties: Optional[list[str]] = None, 
+        market_ids: Optional[list[str]] = None
+    ) -> list[bots.api.types.Account]:
+    query = []
+    
+    if not asset_id is None:
+        query = query + [f"filter.assetId={asset_id}"]
+
+    if not parties is None:
+        parties_list = ",".join(parties)
+        query = query + [f"filter.partyIds={parties_list}"]
+
+    if not market_ids is None:
+        markets_list = ",".join(market_ids)
+        query = query + [f"filter.marketIds={markets_list}"] 
+
+    url = 'api/v2/accounts'
+
+    if len(query) > 0:
+        query_str = "&".join(query)
+        url = f"{url}?{query_str}"
+    
+    for endpoint in endpoints:
+        try:
+            json_resp = get_call(f"{endpoint}/{url}")
+        except:
+            continue
+
+        if not "accounts" in json_resp:
+            continue
+
+        response = []
+        for edge in json_resp["accounts"]["edges"]:
+            if not "node" in edge:
+                continue
+            response.append(bots.api.types.Account(
+                owner=edge["node"]["owner"],
+                balance=int(edge["node"]["balance"]),
+                asset=edge["node"]["asset"],
+                market_id=edge["node"]["marketId"],
+                type=edge["node"]["type"],
+            ))
+
+        return response
+
+    raise requests.RequestException("all endpoints for /api/v2/assets did not return a valid response")

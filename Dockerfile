@@ -4,13 +4,12 @@ ENV POETRY_VERSION=1.2.2
 ENV WALLET_VERSION=v0.71.2
 
 RUN apt-get update \
-    && apt-get install -y \
+    && apt-get install -y --no-install-recommends\
         git \
         unzip \
         wget \
         jq \
         make \
-        rsync \
     && rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
 
 RUN  pip install "poetry==$POETRY_VERSION" \
@@ -29,6 +28,6 @@ RUN wget -q https://github.com/vegaprotocol/vega/releases/download/$WALLET_VERSI
     && vegawallet software version \
     \
     && make prepare_wallet \
-    && make prepare_bots
+    && make prepare_bots_prod
 
 ENTRYPOINT ["make"]
