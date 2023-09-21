@@ -60,14 +60,24 @@ class Traders(Handler):
         self._tokens = tokens
 
     def serve(self):
-        resp = self._cached_response()
-        if resp is None:
-            Traders.logger.info("Refreshing cache for traders response")
-            with self.cache_lock:
-                self.response_cache = self.prepare_response()
-                resp = self.response_cache
-        else:
-            Traders.logger.info("Serving traders response from cache")
+        # for authenticated user we do not want to cache the response
+        if self._is_authenticated():
+            Traders.logger.info("Serving response without cache for authenticated user")
+            resp = self.prepare_response()
+        else: 
+            resp = self._cached_response()
+            if resp is None:
+                Traders.logger.info("Refreshing cache for traders response")
+                with self.cache_lock:
+                    cached_resp = self._cached_response()
+                    if not cached_resp is None:
+                        return cached_resp
+                    
+                    self.response_cache = self.prepare_response()
+                    self.invalidate_cache = datetime.datetime.now() + Traders.cache_ttl
+                    resp = self.response_cache
+            else:
+                Traders.logger.info("Serving traders response from cache")
 
         json_data = json.dumps({"traders": resp}, indent="    ")
         resp = flask.Response(json_data)
@@ -100,10 +110,6 @@ class Traders(Handler):
         
     
     def prepare_response(self) -> dict[str, dict[str, any]]:
-        cached_resp = self._cached_response()
-        if not cached_resp is None:
-            return cached_resp
-
         wallet_state = self.wallet.state
 
         traders = dict()
@@ -168,24 +174,21 @@ class Traders(Handler):
                     }
                 }
 
-                mnemonic = "***** send correct authorization header to see mnemonic *****"
                 public_key = "*** unknown ***"
                 index = -1
                 if scenario_wallet_state is not None and trader_pub_key in scenario_wallet_state.keys:
                     public_key = scenario_wallet_state.keys[trader_pub_key].public_key
                     index = scenario_wallet_state.keys[trader_pub_key].index
 
-                if scenario_wallet_state is not None and self._is_authenticated():
-                    mnemonic = scenario_wallet_state.recovery_phrase
 
                 traders[f"{market_id}_{wallet_name}"]["wallet"] = {
-                    "recoveryPhrase": mnemonic,
                     "index": index,
                     "publicKey": public_key, 
                 }
 
+                if scenario_wallet_state is not None and self._is_authenticated():
+                    traders[f"{market_id}_{wallet_name}"]["wallet"]["recoveryPhrase"] = scenario_wallet_state.recovery_phrase
 
-        self.invalidate_cache = datetime.datetime.now() + Traders.cache_ttl
 
         return traders
     
