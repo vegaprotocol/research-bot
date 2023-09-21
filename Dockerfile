@@ -20,13 +20,5 @@ WORKDIR /research-bots
 COPY . .
 
 RUN make prepare_bots_prod
-    && unzip vegawallet-linux-amd64.zip \
-    && rm -f vegawallet-linux-amd64.zip \
-    && mv vegawallet /bin/vegawallet \
-    && chmod a+x /bin/vegawallet \
-    && vegawallet software version \
-    \
-    && make prepare_wallet \
-    && make prepare_bots_prod
 
 ENTRYPOINT ["make"]
