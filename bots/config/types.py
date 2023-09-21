@@ -278,7 +278,7 @@ def scenario_simulation_config_from_json(json: dict[str, any]) -> ScenarioSimula
 
 def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
     return ScenarioConfig(
-        enable_top_up=bool(json.get("enable_top_up", False)),
+        enable_top_up=bool(json.get("enable_top_up", True)),
         market_name=json.get("market_name", ""),
         market_code=json.get("market_code", ""),
         binance_code=json.get("binance_code", ""),
