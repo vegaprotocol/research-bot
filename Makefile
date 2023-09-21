@@ -13,6 +13,15 @@ export VEGA_WALLET_TOKENS_PASSPHRASE_FILE=$(CURRENT_WORKING_DIR)/assets/passphra
 
 export VEGA_USER_WALLET_NAME=vegamarketsim
 
+
+black:
+	@black --line-length 120 --target-version py311 ./bots
+	@black --line-length 120 --target-version py311 ./main.py
+
+blackcheck:
+	@black --line-length 120 --target-version py311 --check .
+
+
 check:
 	@if ! $(WALLET_BIN) software version > /dev/null; then \
 		echo "Wallet binary is not callable, add $(WALLET_BIN) folder to your PATH"; \
