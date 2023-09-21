@@ -30,12 +30,6 @@ def main():
     )
     bots.http.app.configure_flask(config.debug)
 
-    # before the wallet http server is started we need to use the CLI
-    cli_wallet = VegaWalletCli(config.wallet)
-    if not cli_wallet.is_initialized():
-        cli_wallet.init()
-        cli_wallet.import_internal_networks()
-
     scenarios_config = config.scenarios
 
     rest_api_endpoints = config.network_config.api.rest.hosts
@@ -58,6 +52,14 @@ def main():
     except Exception as e:
         logging.error(str(e))
         return
+
+
+    # before the wallet http server is started we need to use the CLI
+    cli_wallet = VegaWalletCli(config.wallet)
+    if not cli_wallet.is_initialized():
+        cli_wallet.init()
+        cli_wallet.import_internal_networks()
+
 
     scenario_wallets = dict()
     try:
