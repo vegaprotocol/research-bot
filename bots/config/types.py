@@ -6,13 +6,14 @@ from dataclasses import dataclass
 from typing import Optional
 from bots.config.config import is_valid_url, read_config_from_file, read_config_from_url, logger
 
+
 def _market_sim_network_from_devops_network_name(net_name: str) -> str:
     mapping = {
         "devnet1": "DEVNET1",
         "stagnet1": "STAGNET1",
         "fairground": "FAIRGROUND",
         "mainnet-mirror": "MAINNET_MIRROR",
-        "mainnet_mirror": "MAINNET_MIRROR"
+        "mainnet_mirror": "MAINNET_MIRROR",
     }
 
     if not net_name in mapping:
@@ -27,21 +28,25 @@ class AppsNetworkConfig:
     governance: Optional[str]
     explorer: Optional[str]
 
+
 @dataclass
 class ApplicationNetworkConfig:
     local_port: Optional[int]
     url: Optional[str]
+
 
 @dataclass
 class ProtocolAPINetworkConfig:
     hosts: list[str]
     retries: Optional[int]
 
+
 @dataclass
 class APINetworkConfig:
     rest: ProtocolAPINetworkConfig
     grpc: ProtocolAPINetworkConfig
     graph_ql: ProtocolAPINetworkConfig
+
 
 @dataclass
 class NetworkConfig:
@@ -57,6 +62,7 @@ class NetworkConfig:
 
     api: APINetworkConfig
     apps: AppsNetworkConfig
+
 
 @dataclass
 class WalletConfig:
@@ -90,6 +96,7 @@ class WalletConfig:
     def update_binary(self, binary_override: str | list[str]):
         self.binary = binary_override
 
+
 @dataclass
 class HttpServerConfig:
     # IP for listening http servers, e.g: 0.0.0.0 or 127.0.0.1
@@ -104,6 +111,7 @@ class ScenarioMarketManagerConfig:
     adp: int
     mdp: int
     pdp: int
+
 
 @dataclass
 class ScenarioMarketMakerConfig:
@@ -121,12 +129,14 @@ class ScenarioMarketMakerConfig:
     commitment_amount: int
     initial_mint: int
 
+
 @dataclass
 class ScenarioAuctionTraderConfig:
     traders: int
 
     initial_volume: float
     initial_mint: int
+
 
 @dataclass
 class ScenarioRandomTraderConfig:
@@ -137,6 +147,7 @@ class ScenarioRandomTraderConfig:
     step_bias: list[float]
     initial_mint: int
 
+
 @dataclass
 class ScenarioSensitiveTraderConfig:
     traders: int
@@ -144,6 +155,7 @@ class ScenarioSensitiveTraderConfig:
     scale: list[int]
     max_order_size: list[float]
     initial_mint: int
+
 
 @dataclass
 class ScenarioSimulationConfig:
@@ -168,6 +180,7 @@ class ScenarioConfig:
     random_trader: ScenarioRandomTraderConfig
     sensitive_trader: ScenarioSensitiveTraderConfig
     simulation: ScenarioSimulationConfig
+
 
 ScenariosConfigType = dict[str, ScenarioConfig]
 
@@ -199,78 +212,83 @@ class BotsConfig:
     def update_network_config(self, cfg: NetworkConfig):
         self.network_config = cfg
 
+
 def scenario_market_manager_config_from_json(json: dict[str, any]) -> ScenarioMarketManagerConfig:
     return ScenarioMarketManagerConfig(
-        asset_name = json.get("asset_name", ""),
-        adp = int(json.get("adp", 6)),
-        mdp = int(json.get("mdp", 6)),
-        pdp = int(json.get("pdp", 0)),
+        asset_name=json.get("asset_name", ""),
+        adp=int(json.get("adp", 6)),
+        mdp=int(json.get("mdp", 6)),
+        pdp=int(json.get("pdp", 0)),
     )
 
+
 def scenario_market_maker_config_from_json(json: dict[str, any]) -> ScenarioMarketMakerConfig:
-    return ScenarioMarketMakerConfig(            
-        market_kappa = float(json.get("market_kappa", 0.15)),
-        market_order_arrival_rate = int(json.get("market_order_arrival_rate", 100)),
-        order_kappa = float(json.get("order_kappa", 0.15)),
-        order_size = int(json.get("order_size", 1)),
-        order_levels = int(json.get("order_levels", 25)),
-        order_spacing = float(json.get("order_spacing", 1)),
-        order_clipping = int(json.get("order_clipping", 10000)),
-        inventory_lower_boundary = int(json.get("inventory_lower_boundary", -3)),
-        inventory_upper_boundary = int(json.get("inventory_upper_boundary", 3)),
-        fee_amount = float(json.get("fee_amount", 0.0001)),
-        commitment_amount = int(json.get("commitment_amount", 800000)),
-        initial_mint = int(json.get("initial_mint", 200000)),
+    return ScenarioMarketMakerConfig(
+        market_kappa=float(json.get("market_kappa", 0.15)),
+        market_order_arrival_rate=int(json.get("market_order_arrival_rate", 100)),
+        order_kappa=float(json.get("order_kappa", 0.15)),
+        order_size=int(json.get("order_size", 1)),
+        order_levels=int(json.get("order_levels", 25)),
+        order_spacing=float(json.get("order_spacing", 1)),
+        order_clipping=int(json.get("order_clipping", 10000)),
+        inventory_lower_boundary=int(json.get("inventory_lower_boundary", -3)),
+        inventory_upper_boundary=int(json.get("inventory_upper_boundary", 3)),
+        fee_amount=float(json.get("fee_amount", 0.0001)),
+        commitment_amount=int(json.get("commitment_amount", 800000)),
+        initial_mint=int(json.get("initial_mint", 200000)),
     )
+
 
 def scenario_auction_trader_config_from_json(json: dict[str, any]) -> ScenarioAuctionTraderConfig:
     return ScenarioAuctionTraderConfig(
-        traders = int(json.get("traders", 2)),
-        initial_volume = float(json.get("initial_volume", 0.001)),
-        initial_mint = int(json.get("initial_mint", 10000)),
+        traders=int(json.get("traders", 2)),
+        initial_volume=float(json.get("initial_volume", 0.001)),
+        initial_mint=int(json.get("initial_mint", 10000)),
     )
+
 
 def scenario_random_trader_config_from_json(json: dict[str, any]) -> ScenarioRandomTraderConfig:
     return ScenarioRandomTraderConfig(
-        traders = int(json.get("traders", 3)),
-        order_intensity = [ int(val) for val in json.get("order_intensity", []) ],
-        order_volume = [ float(val) for val in json.get("order_volume", []) ],
-        step_bias = [ float(val) for val in json.get("step_bias", []) ],
-        initial_mint = int(json.get("initial_mint", 1000000)),
+        traders=int(json.get("traders", 3)),
+        order_intensity=[int(val) for val in json.get("order_intensity", [])],
+        order_volume=[float(val) for val in json.get("order_volume", [])],
+        step_bias=[float(val) for val in json.get("step_bias", [])],
+        initial_mint=int(json.get("initial_mint", 1000000)),
     )
+
 
 def scenario_sensitive_trader_config_from_json(json: dict[str, any]) -> ScenarioSensitiveTraderConfig:
     return ScenarioSensitiveTraderConfig(
-        traders = int(json.get("traders", 3)),
-        scale = [ int(val) for val in json.get("scale", []) ],
-        max_order_size = [ float(val) for val in json.get("max_order_size", []) ],
-        initial_mint = int(json.get("initial_mint", 10000)),
+        traders=int(json.get("traders", 3)),
+        scale=[int(val) for val in json.get("scale", [])],
+        max_order_size=[float(val) for val in json.get("max_order_size", [])],
+        initial_mint=int(json.get("initial_mint", 10000)),
     )
+
 
 def scenario_simulation_config_from_json(json: dict[str, any]) -> ScenarioSimulationConfig:
     return ScenarioSimulationConfig(
-        n_steps = int(json.get("n_steps", 360)),
-        granularity = json.get("granularity", "MINUTE"),
-        coinbase_code = json.get("coinbase_code", "BTC-USDT"),
-        start_date = json.get("start_date", "2022-11-01 00:00:00"),
-        randomise_history = bool(json.get("randomise_history", False)),
-
+        n_steps=int(json.get("n_steps", 360)),
+        granularity=json.get("granularity", "MINUTE"),
+        coinbase_code=json.get("coinbase_code", "BTC-USDT"),
+        start_date=json.get("start_date", "2022-11-01 00:00:00"),
+        randomise_history=bool(json.get("randomise_history", False)),
     )
+
 
 def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
     return ScenarioConfig(
-        enable_top_up = bool(json.get("enable_top_up", False)),
-        market_name = json.get("market_name", ""),
-        market_code = json.get("market_code", ""),
-        binance_code = json.get("binance_code", ""),
-        step_length_seconds = int(json.get("step_length_seconds", 10)),
-
-        market_manager = scenario_market_manager_config_from_json(json.get("market_manager_args", {})),
-        market_maker = scenario_market_maker_config_from_json(json.get("market_maker_args", {})),
-        auction_trader = scenario_auction_trader_config_from_json(json.get("auction_trader_args", {})),
-        random_trader = scenario_random_trader_config_from_json(json.get("random_trader_args", {})),
-        sensitive_trader = scenario_sensitive_trader_config_from_json(json.get("sensitive_trader_args", [])),
-        simulation = scenario_simulation_config_from_json(json.get("simulation_args", {})),
+        enable_top_up=bool(json.get("enable_top_up", False)),
+        market_name=json.get("market_name", ""),
+        market_code=json.get("market_code", ""),
+        binance_code=json.get("binance_code", ""),
+        step_length_seconds=int(json.get("step_length_seconds", 10)),
+        market_manager=scenario_market_manager_config_from_json(json.get("market_manager_args", {})),
+        market_maker=scenario_market_maker_config_from_json(json.get("market_maker_args", {})),
+        auction_trader=scenario_auction_trader_config_from_json(json.get("auction_trader_args", {})),
+        random_trader=scenario_random_trader_config_from_json(json.get("random_trader_args", {})),
+        sensitive_trader=scenario_sensitive_trader_config_from_json(json.get("sensitive_trader_args", [])),
+        simulation=scenario_simulation_config_from_json(json.get("simulation_args", {})),
     )
 
 
@@ -281,7 +299,7 @@ def wallet_config_from_json(json: dict[str, any]) -> WalletConfig:
 
     wallet_home = json.get("home", "./wallethome")
     if not os.path.isabs(wallet_home):
-        wallet_home =  os.path.abspath(os.path.join(os.getcwd(), wallet_home))
+        wallet_home = os.path.abspath(os.path.join(os.getcwd(), wallet_home))
 
     return WalletConfig(
         version=json.get("version", None),
@@ -299,16 +317,18 @@ def wallet_config_from_json(json: dict[str, any]) -> WalletConfig:
         state_file=json.get("state_file", "./network/wallet-state.json"),
     )
 
+
 def http_server_config_from_json(json: dict[str, any]) -> HttpServerConfig:
     return HttpServerConfig(
         interface=json.get("interface", "0.0.0.0"),
         port=int(json.get("port", 8080)),
     )
 
+
 def config_from_json(json: dict[str, any]) -> BotsConfig:
     work_dir = json.get("work_dir", "./network")
     if not os.path.isabs(work_dir):
-        work_dir =  os.path.abspath(os.path.join(os.getcwd(), work_dir))
+        work_dir = os.path.abspath(os.path.join(os.getcwd(), work_dir))
 
     wallet_config = wallet_config_from_json(json.get("vegawallet", dict()))
 
@@ -318,11 +338,12 @@ def config_from_json(json: dict[str, any]) -> BotsConfig:
         network_config_file=json.get("network_config_file", ""),
         debug=bool(json.get("debug", False)),
         work_dir=work_dir,
-
         wallet=wallet_config,
         http_server=http_server_config_from_json(json.get("http_server", dict())),
-        scenarios={ scenario_name: scenario_config_from_json(raw_scenarios_config[scenario_name]) for scenario_name in raw_scenarios_config },
-
+        scenarios={
+            scenario_name: scenario_config_from_json(raw_scenarios_config[scenario_name])
+            for scenario_name in raw_scenarios_config
+        },
         devops_network_name=wallet_config.network_name,
         vega_market_sim_network_name=_market_sim_network_from_devops_network_name(wallet_config.network_name),
         network_config=None,
@@ -330,24 +351,23 @@ def config_from_json(json: dict[str, any]) -> BotsConfig:
 
     return config
 
+
 ##
- # Network config aka wallet toml config
- ##
+# Network config aka wallet toml config
+##
+
 
 def api_network_config_from_dict(data: dict[str, any]) -> ProtocolAPINetworkConfig:
-    retries = data.get('Retries', None)
+    retries = data.get("Retries", None)
 
-    return ProtocolAPINetworkConfig(
-        hosts=data.get("Hosts", []),
-        retries=int(retries) if not retries is None else None
-    )
+    return ProtocolAPINetworkConfig(hosts=data.get("Hosts", []), retries=int(retries) if not retries is None else None)
+
 
 def apps_network_config_from_dict(data: dict[str, any]) -> AppsNetworkConfig:
     return AppsNetworkConfig(
-        console=data.get("Console", None),
-        governance=data.get("Governance", None),
-        explorer=data.get("Explorer", None)
+        console=data.get("Console", None), governance=data.get("Governance", None), explorer=data.get("Explorer", None)
     )
+
 
 def network_config_from_dict(path: str, data: dict[str, any]) -> NetworkConfig:
     return NetworkConfig(
@@ -358,18 +378,16 @@ def network_config_from_dict(path: str, data: dict[str, any]) -> NetworkConfig:
         name=data.get("Name", ""),
         port=int(data.get("Port", 1789)),
         token_expiry=data.get("TokenExpiry", None),
-        
         api=APINetworkConfig(
             grpc=api_network_config_from_dict(data["API"]["GRPC"]),
             rest=api_network_config_from_dict(data["API"]["REST"]),
             graph_ql=api_network_config_from_dict(data["API"]["GraphQL"]),
         ),
-
         metadata={
-            metadata.get("Key"): metadata.get("Value") 
-            for metadata in data.get("Metadata", []) if "Key" in metadata and "Value" in metadata
+            metadata.get("Key"): metadata.get("Value")
+            for metadata in data.get("Metadata", [])
+            if "Key" in metadata and "Value" in metadata
         },
-
         apps=apps_network_config_from_dict(data.get("Apps", dict())),
     )
 
@@ -380,22 +398,23 @@ def _local_network_config_path(path: str, devops_network_name: str, base_dir: st
     if is_valid_url(path):
         if not os.path.isdir(base_dir):
             os.mkdir(base_dir)
-        
+
         logger.info(f"Downloading network config from {path} to {base_dir}/vegawallet-{devops_network_name}.toml")
 
         file_path = os.path.join(base_dir, f"vegawallet-{devops_network_name}.toml")
         with urllib.request.urlopen(url=path, timeout=5.0) as response, open(file_path, "w") as f:
             config_content = response.read()
-            f.write(config_content.decode('utf-8'))
+            f.write(config_content.decode("utf-8"))
 
         logger.info("The network config downloaded")
         return file_path
-    
+
     # Add check for the file name
     if os.path.isfile(path):
         return path
 
     raise Exception("Network config does not exists")
+
 
 def load_network_config(path: str, devops_network_name: str, base_dir: str) -> NetworkConfig:
     local_config_path = _local_network_config_path(path, devops_network_name, base_dir)
@@ -410,10 +429,8 @@ def load_network_config(path: str, devops_network_name: str, base_dir: str) -> N
 def read_bots_config(path: str) -> BotsConfig:
     config_json = None
     if is_valid_url(path):
-        config_json =  read_config_from_url(path)
-    else: 
+        config_json = read_config_from_url(path)
+    else:
         config_json = read_config_from_file(path)
 
     return config_from_json(config_json)
-
-

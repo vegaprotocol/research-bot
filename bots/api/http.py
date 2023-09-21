@@ -1,6 +1,7 @@
 import requests
 import logging
 
+
 def get_call(endpoint: str) -> any:
     endpoint_url = endpoint if "http" in endpoint else f"https://{endpoint}"
 
