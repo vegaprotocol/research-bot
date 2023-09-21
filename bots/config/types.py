@@ -1,5 +1,4 @@
 import os
-import os.path
 import tomllib
 import urllib.request
 
@@ -83,8 +82,10 @@ class WalletConfig:
     passphrase_file: str
     # Wallet URL
     wallet_url: str
-    # Tokens file
+    # Tokens file - file required by the vega-market-sim to read the wallet api token for specific wallet
     tokens_file: str
+    # State file - file where all generated keys (mnemonics, public keys, are stored)
+    state_file: str
 
     def update_binary(self, binary_override: str | list[str]):
         self.binary = binary_override
@@ -155,6 +156,7 @@ class ScenarioSimulationConfig:
 
 @dataclass
 class ScenarioConfig:
+    enable_top_up: bool
     market_name: str
     market_code: str
     binance_code: str
@@ -257,6 +259,7 @@ def scenario_simulation_config_from_json(json: dict[str, any]) -> ScenarioSimula
 
 def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
     return ScenarioConfig(
+        enable_top_up = bool(json.get("enable_top_up", False)),
         market_name = json.get("market_name", ""),
         market_code = json.get("market_code", ""),
         binance_code = json.get("binance_code", ""),
@@ -292,7 +295,8 @@ def wallet_config_from_json(json: dict[str, any]) -> WalletConfig:
         home=wallet_home,
         passphrase_file=passphrase_file,
         wallet_url=json.get("wallet_url", "http://127.0.0.1:1789"),
-        tokens_file=json.get("tokens_file", "./network/wallet-info.json")
+        tokens_file=json.get("tokens_file", "./network/wallet-info.json"),
+        state_file=json.get("state_file", "./network/wallet-state.json"),
     )
 
 def http_server_config_from_json(json: dict[str, any]) -> HttpServerConfig:

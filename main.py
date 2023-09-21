@@ -1,8 +1,6 @@
 import os
 import logging
-import os.path
 import argparse
-import multiprocessing
 import bots.http.app
 
 from bots.services.multiprocessing import service_manager
@@ -15,12 +13,14 @@ from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
 from bots.tools.github import download_and_unzip_github_asset
 from bots.config.types import load_network_config, read_bots_config
-from bots.cli.wallet import VegaWallet as VegawalletCli
+from bots.wallet.cli import VegaWalletCli
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", default="./config.toml")
     args = parser.parse_args()
+    tokens = os.getenv("TOKENS", "")
+    tokens_list = [ token.strip() for token in tokens.split(",") if len(token.strip()) > 1 ]
 
     config = read_bots_config(args.config)
     logging.basicConfig(level=logging.DEBUG if config.debug else logging.INFO)
@@ -28,7 +28,7 @@ def main():
     bots.http.app.configure_flask(config.debug)
 
     # before the wallet http server is started we need to use the CLI
-    cli_wallet = VegawalletCli(config.wallet)
+    cli_wallet = VegaWalletCli(config.wallet)
     if not cli_wallet.is_initialized():
         cli_wallet.init()
         cli_wallet.import_internal_networks()
@@ -63,7 +63,7 @@ def main():
         check_env_variables()
         check_market_exists(rest_api_endpoints, required_market_names)
         scenario_wallets = scenario_wallet_from_config(config.scenarios, cli_wallet)
-        traders_svc = traders_from_config(config, wallet_svc, scenario_wallets)
+        traders_svc = traders_from_config(config, wallet_svc, scenario_wallets, tokens_list)
         bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
     except Exception as e:
         logging.error(str(e))

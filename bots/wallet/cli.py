@@ -1,12 +1,14 @@
 import bots.config.types
+import bots.wallet.state
 import subprocess
 import json
 import logging
 import os.path
 
-class VegaWallet:
+class VegaWalletCli:
     def __init__(self, wallet_config: bots.config.types.WalletConfig):
         self._wallet_config = wallet_config
+        self._state = bots.wallet.state.WalletStateService(wallet_config.state_file)
 
     def _exec(self, args) -> dict:
         if len(self._wallet_config.home) > 0:
@@ -148,7 +150,15 @@ class VegaWallet:
 
         if not "wallet" in resp:
             raise RuntimeError("Invalid response from create_wallet command")
-        
+        if not "key" in resp:
+            raise RuntimeError("Invalid response from create_wallet command")
+        # wallet_name: str, public_key: str, recovery_phrase: str
+        self._state.add_wallet(
+            wallet_name, 
+            resp["key"]["publicKey"], 
+            resp["wallet"]["recoveryPhrase"],   
+        )
+
         return resp["wallet"]
 
     def generate_key(self, wallet_name: str, key_name: str):
@@ -172,8 +182,20 @@ class VegaWallet:
             "--passphrase-file", self._wallet_config.passphrase_file,
         ]
 
-        return self._exec(args)
-    
+        resp = self._exec(args)
+
+        if not "publicKey" in resp:
+            raise RuntimeError("Invalid response from generate_key command")
+        
+        self._state.add_key(
+            wallet_name, 
+            key_name,
+            resp["publicKey"], 
+            len(keys),   
+        )
+
+        return resp
+
     def import_internal_networks(self):
         networks = [
             "https://raw.githubusercontent.com/vegaprotocol/networks-internal/main/stagnet1/vegawallet-stagnet1.toml",

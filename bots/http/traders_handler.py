@@ -38,6 +38,7 @@ class Traders(Handler):
                  wallet: VegaWallet, 
                  wallet_name: str,
                  scenario_wallets: dict[str, ScenarioWallet],
+                 tokens: list[str],
     ):
         self.host = host
         self.port = port
@@ -55,6 +56,8 @@ class Traders(Handler):
         self.response_cache = None 
         self.cache_lock = multiprocessing.Lock()
         self.invalidate_cache = None
+
+        self._tokens = tokens
 
     def serve(self):
         resp = self._cached_response()
@@ -80,6 +83,21 @@ class Traders(Handler):
             return None
         
         return self.response_cache
+
+    def _is_authenticated(self) -> bool:
+        if not 'Authorization' in flask.request.headers:
+            return False
+        
+        if len(self._tokens) < 1:
+            return False
+        
+        authorization_header = flask.request.headers['Authorization']
+        
+        header_parts = authorization_header.split()
+        authorization_token = header_parts[-1]
+
+        return authorization_token in self._tokens
+        
     
     def prepare_response(self) -> dict[str, dict[str, any]]:
         cached_resp = self._cached_response()
@@ -140,10 +158,19 @@ class Traders(Handler):
                         "marketQuote": market_tags["quote"] if "quote" in market_tags else "",
                         "marketSettlementEthereumContractAddress": scenario_asset["details"]["erc20"]["contractAddress"],
                         "marketSettlementVegaAssetID": vega_asset_id,
-                        "wanted_tokens": trader_params.initial_mint,
+                        "wantedTokens": trader_params.initial_mint,
                         "balance": float(trader_balance)/(pow(10, int(self.assets[vega_asset_id]["details"]["decimals"]))),
+                        "enableTopUp": scenario_config.enable_top_up,
                     }
                 }
+
+                if self._is_authenticated():
+                    traders[f"{market_id}_{wallet_name}"]["wallet"] = {
+                        "mnemonic": "xxx",
+                        "index": 0,
+                        "publicKey": "xxx", 
+                    }
+
 
         self.invalidate_cache = datetime.datetime.now() + Traders.cache_ttl
 
@@ -177,7 +204,11 @@ class Traders(Handler):
             for item in market["tradableInstrument"]["instrument"]["metadata"]["tags"] 
             if len(item.split(":")) >= 2}
 
-def from_config(config: bots.config.types.BotsConfig, wallet_svc: VegaWallet, scenario_wallets: dict[str, ScenarioWallet]) -> Traders:
+def from_config(
+        config: bots.config.types.BotsConfig, 
+        wallet_svc: VegaWallet, 
+        scenario_wallets: dict[str, ScenarioWallet],
+        tokens: list[str]) -> Traders:
     return Traders(
         host=config.http_server.interface,
         port=config.http_server.port,
@@ -186,4 +217,5 @@ def from_config(config: bots.config.types.BotsConfig, wallet_svc: VegaWallet, sc
         wallet=wallet_svc,
         wallet_name=config.wallet.wallet_name,
         scenario_wallets=scenario_wallets,
+        tokens=[ token for token in tokens if len(token) > 1 ],
     )
