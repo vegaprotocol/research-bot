@@ -18,6 +18,7 @@ def is_valid_url(x):
     except:
         return False
 
+
 def read_config_from_file(file_path: str) -> dict[str, any]:
     logger.info(f"Reading bots config from local file: {file_path}")
     data = None
@@ -26,8 +27,9 @@ def read_config_from_file(file_path: str) -> dict[str, any]:
 
     if data is None:
         raise Exception("No config was returned from file")
-    
+
     return data
+
 
 def read_config_from_url(url: str) -> dict[str, any]:
     logger.info(f"Reading bots config from remote file: {url}")
@@ -35,8 +37,8 @@ def read_config_from_url(url: str) -> dict[str, any]:
 
     resp = requests.get(url)
     data = tomllib.loads(resp.text, parse_float=float)
-    
+
     if data is None:
         raise Exception("No config was returned from URL")
-    
+
     return data

@@ -19,15 +19,6 @@ WORKDIR /research-bots
 
 COPY . .
 
-# Prepare wallet and load pre generated key with known parties
-RUN wget -q https://github.com/vegaprotocol/vega/releases/download/$WALLET_VERSION/vegawallet-linux-amd64.zip \
-    && unzip vegawallet-linux-amd64.zip \
-    && rm -f vegawallet-linux-amd64.zip \
-    && mv vegawallet /bin/vegawallet \
-    && chmod a+x /bin/vegawallet \
-    && vegawallet software version \
-    \
-    && make prepare_wallet \
-    && make prepare_bots_prod
+RUN make prepare_bots_prod
 
 ENTRYPOINT ["make"]
