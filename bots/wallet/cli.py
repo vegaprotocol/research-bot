@@ -10,6 +10,11 @@ class VegaWalletCli:
         self._wallet_config = wallet_config
         self._state = bots.wallet.state.WalletStateService(wallet_config.state_file)
 
+    @property
+    def state(self) -> bots.wallet.state.VegaWalletStateType: 
+        return self._state.state_as_struct()
+
+
     def _exec(self, args) -> dict:
         if len(self._wallet_config.home) > 0:
             args = args + [

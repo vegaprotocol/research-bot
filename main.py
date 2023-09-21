@@ -58,12 +58,10 @@ def main():
 
     scenario_wallets = dict()
     try:
-        wallet_svc = vega_sim_wallet_from_config(config.wallet, wallet_mutex)
-
         check_env_variables()
         check_market_exists(rest_api_endpoints, required_market_names)
         scenario_wallets = scenario_wallet_from_config(config.scenarios, cli_wallet)
-        traders_svc = traders_from_config(config, wallet_svc, scenario_wallets, tokens_list)
+        traders_svc = traders_from_config(config, cli_wallet, scenario_wallets, tokens_list)
         bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())
     except Exception as e:
         logging.error(str(e))

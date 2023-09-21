@@ -57,6 +57,8 @@ def vega_wallet_state_from_json(json: dict) -> VegaWalletStateType:
                 name = keys[public_key].get("name", ""),
                 index = keys[public_key].get("index", 0),
             )
+
+    return result
         
 
 def vega_wallet_state_from_file(path: str) -> VegaWalletStateType:
@@ -121,4 +123,4 @@ class WalletStateService:
             return self._load_state()
     
     def state_as_struct(self) -> VegaWalletStateType:
-        vega_wallet_state_from_json(self.state_as_json())
+        return vega_wallet_state_from_json(self.state_as_json())

@@ -11,7 +11,7 @@ from vega_sim.devops.wallet import ScenarioWallet
 from typing import Optional
 from bots.api.helpers import by_key
 from bots.http.handler import Handler
-from vega_sim.wallet.vega_wallet import VegaWallet
+from bots.wallet.cli import VegaWalletCli
 
 def is_trader(wallet_name: str) -> bool:
     trader_names = ["market_maker", "auction_trader", "random_trader", "sensitive_trader"]
@@ -35,7 +35,7 @@ class Traders(Handler):
                  port: int, 
                  scenarios: bots.config.types.ScenariosConfigType, 
                  api_endpoints: list[str], 
-                 wallet: VegaWallet, 
+                 wallet: VegaWalletCli, 
                  wallet_name: str,
                  scenario_wallets: dict[str, ScenarioWallet],
                  tokens: list[str],
@@ -104,6 +104,8 @@ class Traders(Handler):
         if not cached_resp is None:
             return cached_resp
 
+        wallet_state = self.wallet.state
+
         traders = dict()
         for scenario in self.scenarios:
             scenario_config = self.scenarios[scenario]
@@ -123,12 +125,14 @@ class Traders(Handler):
             if not "erc20" in scenario_asset["details"]:
                 continue
             
-            wallet_keys = self.wallet.get_keypairs(scenario)
+            wallet_keys = self.wallet.list_keys(scenario)
 
             # prepare balances
             parties_ids = [wallet_keys[wallet_name] for wallet_name in wallet_keys]
             parties_balances = { f"{party_id}": 0 for party_id in parties_ids }
             accounts = bots.api.datanode.get_accounts(self.api_endpoints, vega_asset_id)
+
+            scenario_wallet_state = wallet_state.get(scenario, None)
             for account in accounts:
                 if account.owner not in parties_balances:
                     continue
@@ -164,12 +168,21 @@ class Traders(Handler):
                     }
                 }
 
-                if self._is_authenticated():
-                    traders[f"{market_id}_{wallet_name}"]["wallet"] = {
-                        "mnemonic": "xxx",
-                        "index": 0,
-                        "publicKey": "xxx", 
-                    }
+                mnemonic = "***** send correct authorization header to see mnemonic *****"
+                public_key = "*** unknown ***"
+                index = -1
+                if scenario_wallet_state is not None and trader_pub_key in scenario_wallet_state.keys:
+                    public_key = scenario_wallet_state.keys[trader_pub_key].public_key
+                    index = scenario_wallet_state.keys[trader_pub_key].index
+
+                if scenario_wallet_state is not None and self._is_authenticated():
+                    mnemonic = scenario_wallet_state.recovery_phrase
+
+                traders[f"{market_id}_{wallet_name}"]["wallet"] = {
+                    "recoveryPhrase": mnemonic,
+                    "index": index,
+                    "publicKey": public_key, 
+                }
 
 
         self.invalidate_cache = datetime.datetime.now() + Traders.cache_ttl
@@ -206,7 +219,7 @@ class Traders(Handler):
 
 def from_config(
         config: bots.config.types.BotsConfig, 
-        wallet_svc: VegaWallet, 
+        wallet_cli: VegaWalletCli, 
         scenario_wallets: dict[str, ScenarioWallet],
         tokens: list[str]) -> Traders:
     return Traders(
@@ -214,7 +227,7 @@ def from_config(
         port=config.http_server.port,
         scenarios=config.scenarios,
         api_endpoints=config.network_config.api.rest.hosts,
-        wallet=wallet_svc,
+        wallet=wallet_cli,
         wallet_name=config.wallet.wallet_name,
         scenario_wallets=scenario_wallets,
         tokens=[ token for token in tokens if len(token) > 1 ],
