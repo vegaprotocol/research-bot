@@ -353,10 +353,8 @@ def config_from_json(json: dict[str, any]) -> BotsConfig:
 
 
 ##
-# Network config aka wallet toml config
-##
-
-
+ # Network config aka wallet toml config
+ ##
 def api_network_config_from_dict(data: dict[str, any]) -> ProtocolAPINetworkConfig:
     retries = data.get("Retries", None)
 

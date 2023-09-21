@@ -52,6 +52,14 @@ def main():
     except Exception as e:
         logging.error(str(e))
         return
+    
+
+    # before the wallet http server is started we need to use the CLI
+    cli_wallet = VegawalletCli(config.wallet)
+    if not cli_wallet.is_initialized():
+        cli_wallet.init()
+        cli_wallet.import_internal_networks()
+
 
 
     # before the wallet http server is started we need to use the CLI
