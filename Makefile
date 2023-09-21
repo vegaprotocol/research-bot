@@ -1,14 +1,14 @@
 WALLET_BIN=vegawallet
-CURRENT_WORKING_DIR=$(shell pwd)
+WORKING_DIR ?= $(shell pwd)
 WALLET_PASSPHRASE=123456789
 
 CONFIG_FILE ?= "config.toml"
 
-export BOTS_WORKING_DIR=$(CURRENT_WORKING_DIR)/network
-export PREGENERATED_WALLET_PATH=$(CURRENT_WORKING_DIR)/assets/wallets/vegamarketsim 
-export VEGA_WALLET_HOME=$(CURRENT_WORKING_DIR)/wallethome
-export VEGA_WALLET_TOKENS_FILE=$(BOTS_WORKING_DIR)/wallet-info.json
-export VEGA_WALLET_TOKENS_PASSPHRASE_FILE=$(CURRENT_WORKING_DIR)/assets/passphrase.txt
+export BOTS_WORKING_DIR=$(WORKING_DIR)/network
+export PREGENERATED_WALLET_PATH=$(WORKING_DIR)/assets/wallets/vegamarketsim 
+export VEGA_WALLET_HOME=$(WORKING_DIR)/wallethome
+export VEGA_WALLET_TOKENS_FILE ?= $(BOTS_WORKING_DIR)/wallet-info.json
+export VEGA_WALLET_TOKENS_PASSPHRASE_FILE=$(WORKING_DIR)/assets/passphrase.txt
 
 
 export VEGA_USER_WALLET_NAME=vegamarketsim
