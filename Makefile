@@ -112,3 +112,10 @@ prepare_bots_prod:
 
 run_bots: prepare_bots
 	poetry run python main.py --config "$(CONFIG_FILE)"
+
+run_bots_memray: prepare_bots
+	poetry run \
+		python \
+		-m memray run \
+		--follow-fork \
+		-m main --config "$(CONFIG_FILE)"
