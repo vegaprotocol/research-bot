@@ -117,5 +117,5 @@ run_bots_memray: prepare_bots
 	poetry run \
 		python \
 		-m memray run \
-		--follow-fork \
+		$(MEMRAY_ARGS) \
 		-m main --config "$(CONFIG_FILE)"
