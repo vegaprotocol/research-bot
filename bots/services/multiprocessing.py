@@ -1,18 +1,18 @@
-import multiprocessing
+from threading import Thread
 
 from bots.services.service import Service
 
 
 def threaded(fn):
     def wrapper(*args, **kwargs):
-        thread = multiprocessing.Process(target=fn, args=args, kwargs=kwargs)
+        thread = Thread(target=fn, args=args, kwargs=kwargs)
         thread.start()
         return thread
 
     return wrapper
 
 
-def service_manager(services: list[Service]) -> list[multiprocessing.Process]:
+def service_manager(services: list[Service]) -> list[Thread]:
     errors = []
     for svc in services:
         try:

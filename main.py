@@ -7,7 +7,6 @@ from bots.services.multiprocessing import service_manager
 from bots.services.scenario import services_from_config
 from bots.http.traders_handler import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
-from bots.vega_sim.wallet import from_config as vega_sim_wallet_from_config
 from bots.vega_sim.scenario_wallet import from_config as scenario_wallet_from_config
 from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
@@ -55,7 +54,7 @@ def main():
     
 
     # before the wallet http server is started we need to use the CLI
-    cli_wallet = VegawalletCli(config.wallet)
+    cli_wallet = VegaWalletCli(config.wallet)
     if not cli_wallet.is_initialized():
         cli_wallet.init()
         cli_wallet.import_internal_networks()
@@ -100,8 +99,8 @@ def main():
     except Exception as e:
         logging.error("HTTP Server failed with error: " + str(e))
 
-    for process in processes:
-        process.kill()
+    # for process in processes:
+    #     process.kill()
 
 
 if __name__ == "__main__":
