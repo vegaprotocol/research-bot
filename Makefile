@@ -3,6 +3,7 @@ WORKING_DIR ?= $(shell pwd)
 WALLET_PASSPHRASE=123456789
 
 CONFIG_FILE ?= "config.toml"
+MEMRAY_ARGS = ""
 
 export BOTS_WORKING_DIR=$(WORKING_DIR)/network
 export PREGENERATED_WALLET_PATH=$(WORKING_DIR)/assets/wallets/vegamarketsim 
