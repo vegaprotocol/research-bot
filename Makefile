@@ -3,6 +3,7 @@ WORKING_DIR ?= $(shell pwd)
 WALLET_PASSPHRASE=123456789
 
 CONFIG_FILE ?= "config.toml"
+MEMRAY_ARGS = ""
 
 export BOTS_WORKING_DIR=$(WORKING_DIR)/network
 export PREGENERATED_WALLET_PATH=$(WORKING_DIR)/assets/wallets/vegamarketsim 
@@ -112,3 +113,10 @@ prepare_bots_prod:
 
 run_bots: prepare_bots
 	poetry run python main.py --config "$(CONFIG_FILE)"
+
+run_bots_memray: prepare_bots
+	poetry run \
+		python \
+		-m memray run \
+		$(MEMRAY_ARGS) \
+		-m main --config "$(CONFIG_FILE)"
