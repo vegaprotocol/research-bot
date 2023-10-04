@@ -10,7 +10,7 @@ export PREGENERATED_WALLET_PATH=$(WORKING_DIR)/assets/wallets/vegamarketsim
 export VEGA_WALLET_HOME=$(WORKING_DIR)/wallethome
 export VEGA_WALLET_TOKENS_FILE ?= $(BOTS_WORKING_DIR)/wallet-info.json
 export VEGA_WALLET_TOKENS_PASSPHRASE_FILE=$(WORKING_DIR)/assets/passphrase.txt
-
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 export VEGA_USER_WALLET_NAME=vegamarketsim
 

@@ -17,7 +17,7 @@ from bots.wallet.cli import VegaWalletCli
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", default="./config.toml")
+    parser.add_argument("-c", "--config", default="./research-bots-config-stagnet1.toml")
     args = parser.parse_args()
     tokens = os.getenv("TOKENS", "")
     tokens_list = [token.strip() for token in tokens.split(",") if len(token.strip()) > 1]
@@ -104,4 +104,15 @@ def main():
 
 
 if __name__ == "__main__":
+    from pypprof.net_http import start_pprof_server
+    start_pprof_server(port=8081)
     main()
+
+
+
+    # import cProfile
+    # profiler = cProfile.Profile()
+    # profiler.enable()
+    # main()
+    # profiler.disable()
+    

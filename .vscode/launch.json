@@ -9,12 +9,19 @@
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
-                "--config", "${workspaceFolder}/config.toml"
-            ]
+                "--config", "${workspaceFolder}/research-bots-config-stagnet1.toml"
+            ],
+            "env": {
+                "VEGA_USER_WALLET_NAME": "vegamarketsim",
+                "VEGA_WALLET_TOKENS_FILE": "${workspaceFolder}/network/wallet-info.json",
+                "VEGA_WALLET_TOKENS_PASSPHRASE_FILE": "${workspaceFolder}/assets/passphrase.txt",
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
+            }
         }
     ]
 }

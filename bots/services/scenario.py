@@ -2,6 +2,7 @@ import logging
 import multiprocessing
 import bots.config.types
 
+from typing import Optional
 from bots.services.service import Service
 from bots.services.multiprocessing import threaded
 from bots.vega_sim.network import network_from_devops_network_name
@@ -81,14 +82,17 @@ def services_from_config(
 
     services = []
 
+    vega_network = network_from_devops_network_name(
+        vega_sim_network_name, wallet_config.home, network_config_path, wallet_config.binary, wallet_mutex
+    )
     for scenario_name in scenarios:
+
+
         services.append(
             ScenarioService(
                 scenario_name,
                 scenarios_config[scenario_name],
-                network_from_devops_network_name(
-                    vega_sim_network_name, wallet_config.home, network_config_path, wallet_config.binary, wallet_mutex
-                ),
+                vega_network,
                 vega_sim_network_name,
                 scenarios[scenario_name],
             )

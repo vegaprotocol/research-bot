@@ -11,7 +11,8 @@ python = "^3.9,<3.12"
 vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", branch = "research-bots" }
 # vega_sim = { path = "../vega-market-sim", develop = true }
 flask = "^2.3.3"
-memray = "^1.9.1"
+pypprof = "0.0.1"
+
 
 
 [build-system]
