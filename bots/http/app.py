@@ -2,7 +2,7 @@ import bots.config.types
 
 from flask import Flask
 from typing import Callable
-
+from waitress import serve
 
 app = Flask(__name__)
 
@@ -42,4 +42,5 @@ def run(debug: bool, http_config: bots.config.types.HttpServerConfig):
     if http_config.interface is None or len(http_config.interface) < 1:
         host = "0.0.0.0"
 
-    app.run(debug=debug, host=host, port=port)
+    serve(app, host=host, port=port)
+    # app.run(debug=debug, host=host, port=port)

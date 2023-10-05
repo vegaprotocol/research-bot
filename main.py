@@ -104,15 +104,9 @@ def main():
 
 
 if __name__ == "__main__":
-    from pypprof.net_http import start_pprof_server
-    start_pprof_server(port=8081)
+    with_pprof = os.getenv("WITH_PPROF", "")
+    if with_pprof != "":
+        logging.info("Starting pprof server on port 8081")
+        from pypprof.net_http import start_pprof_server
+        start_pprof_server(port=8081)
     main()
-
-
-
-    # import cProfile
-    # profiler = cProfile.Profile()
-    # profiler.enable()
-    # main()
-    # profiler.disable()
-    

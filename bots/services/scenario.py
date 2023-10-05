@@ -1,8 +1,9 @@
 import logging
+import time
 import multiprocessing
 import bots.config.types
+import requests
 
-from typing import Optional
 from bots.services.service import Service
 from bots.services.multiprocessing import threaded
 from bots.vega_sim.network import network_from_devops_network_name
@@ -47,7 +48,20 @@ class ScenarioService(Service):
         # TBD
 
     def wait(self):
-        pass
+        for i in range(1, 10):
+            self.logger.info("Waiting for vegawallet to start")
+            try:
+                r = requests.get("http://127.0.0.1:1789/api/v2/health")
+                if r.status_code >= 200 and r.status_code < 300:
+                    self.logger.info("Wallet started")
+                    time.sleep(3)
+                    return
+                # prints the int of the status code. Find more at httpstatusrappers.com :)
+            except requests.ConnectionError:
+                pass
+
+            time.sleep(3)
+
 
     @threaded
     def start(self):

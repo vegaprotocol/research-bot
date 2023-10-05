@@ -25,6 +25,7 @@ def service_manager(services: list[Service]) -> list[Thread]:
 
     result = []
     for svc in services:
+        svc.wait()
         result += [svc.start()]
 
     return result

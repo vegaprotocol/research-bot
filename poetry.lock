@@ -1084,6 +1084,22 @@ reference = "research-bots"
 resolved_reference = "a0161e47d7371890fbb020563cdadcfcd6bbfdb9"
 
 [[package]]
+name = "waitress"
+version = "2.1.2"
+description = "Waitress WSGI server"
+category = "main"
+optional = false
+python-versions = ">=3.7.0"
+files = [
+    {file = "waitress-2.1.2-py3-none-any.whl", hash = "sha256:7500c9625927c8ec60f54377d590f67b30c8e70ef4b8894214ac6e4cad233d2a"},
+    {file = "waitress-2.1.2.tar.gz", hash = "sha256:780a4082c5fbc0fde6a2fcfe5e26e6efc1e8f425730863c04085769781f51eba"},
+]
+
+[package.extras]
+docs = ["Sphinx (>=1.8.1)", "docutils", "pylons-sphinx-themes (>=1.0.9)"]
+testing = ["coverage (>=5.0)", "pytest", "pytest-cover"]
+
+[[package]]
 name = "websocket-client"
 version = "1.6.3"
 description = "WebSocket client for Python with low level API options"
@@ -1323,4 +1339,4 @@ protobuf = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "f0dac01f9c759787a5516a6668d0fa56989d2dfd4b8dc07a96e16b0b35c5b520"
+content-hash = "fba436bffa68753ba6a6d035b3687e042d3f0cd422bf6949aac8a2fce4e509e9"

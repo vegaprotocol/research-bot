@@ -103,7 +103,7 @@ class VegaWalletService(Service):
             raise RuntimeError("Wallet is already running")
 
         wallet_args = self._wallet_args(["wallet", "service", "run"], True) + ["--no-version-check"]
-
+        VegaWalletService.logger.info(f"wallet_args: {wallet_args}")
         self.process = subprocess.Popen(
             wallet_args,
             stdout=subprocess.PIPE,
