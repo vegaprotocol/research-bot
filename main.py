@@ -7,7 +7,6 @@ from bots.services.multiprocessing import service_manager
 from bots.services.scenario import services_from_config
 from bots.http.traders_handler import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
-from bots.vega_sim.wallet import from_config as vega_sim_wallet_from_config
 from bots.vega_sim.scenario_wallet import from_config as scenario_wallet_from_config
 from bots.config.environment import check_env_variables
 from bots.api.datanode import check_market_exists, get_statistics
@@ -18,7 +17,7 @@ from bots.wallet.cli import VegaWalletCli
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", default="./config.toml")
+    parser.add_argument("-c", "--config", default="./research-bots-config-stagnet1.toml")
     args = parser.parse_args()
     tokens = os.getenv("TOKENS", "")
     tokens_list = [token.strip() for token in tokens.split(",") if len(token.strip()) > 1]
@@ -52,6 +51,14 @@ def main():
     except Exception as e:
         logging.error(str(e))
         return
+    
+
+    # before the wallet http server is started we need to use the CLI
+    cli_wallet = VegaWalletCli(config.wallet)
+    if not cli_wallet.is_initialized():
+        cli_wallet.init()
+        cli_wallet.import_internal_networks()
+
 
 
     # before the wallet http server is started we need to use the CLI
@@ -92,9 +99,14 @@ def main():
     except Exception as e:
         logging.error("HTTP Server failed with error: " + str(e))
 
-    for process in processes:
-        process.kill()
+    # for process in processes:
+    #     process.kill()
 
 
 if __name__ == "__main__":
+    with_pprof = os.getenv("WITH_PPROF", "")
+    if with_pprof != "":
+        logging.info("Starting pprof server on port 8081")
+        from pypprof.net_http import start_pprof_server
+        start_pprof_server(port=8081)
     main()

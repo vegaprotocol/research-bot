@@ -19,6 +19,7 @@ WORKDIR /research-bots
 
 COPY . .
 
+# Prepare wallet and load pre generated key with known parties
 RUN make prepare_bots_prod
 
 ENTRYPOINT ["make"]

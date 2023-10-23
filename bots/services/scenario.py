@@ -1,6 +1,8 @@
 import logging
+import time
 import multiprocessing
 import bots.config.types
+import requests
 
 from bots.services.service import Service
 from bots.services.multiprocessing import threaded
@@ -46,7 +48,20 @@ class ScenarioService(Service):
         # TBD
 
     def wait(self):
-        pass
+        for i in range(1, 10):
+            self.logger.info("Waiting for vegawallet to start")
+            try:
+                r = requests.get("http://127.0.0.1:1789/api/v2/health")
+                if r.status_code >= 200 and r.status_code < 300:
+                    self.logger.info("Wallet started")
+                    time.sleep(3)
+                    return
+                # prints the int of the status code. Find more at httpstatusrappers.com :)
+            except requests.ConnectionError:
+                pass
+
+            time.sleep(3)
+
 
     @threaded
     def start(self):
@@ -81,14 +96,17 @@ def services_from_config(
 
     services = []
 
+    vega_network = network_from_devops_network_name(
+        vega_sim_network_name, wallet_config.home, network_config_path, wallet_config.binary, wallet_mutex
+    )
     for scenario_name in scenarios:
+
+
         services.append(
             ScenarioService(
                 scenario_name,
                 scenarios_config[scenario_name],
-                network_from_devops_network_name(
-                    vega_sim_network_name, wallet_config.home, network_config_path, wallet_config.binary, wallet_mutex
-                ),
+                vega_network,
                 vega_sim_network_name,
                 scenarios[scenario_name],
             )
