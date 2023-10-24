@@ -156,12 +156,21 @@ class Traders(Handler):
                 if account.type in ["ACCOUNT_TYPE_GENERAL", "ACCOUNT_TYPE_MARGIN"]:
                     parties_balances[account.owner] += account.balance
 
+            reported_wallets_count = {}
             for wallet_name in wallet_keys:
                 if not is_trader(wallet_name):
                     continue
 
                 trader_pub_key = wallet_keys[wallet_name]
-                trader_params = getattr(scenario_config, get_config_attr_name(wallet_name))
+                trader_kind = get_config_attr_name(wallet_name)
+                trader_params = getattr(scenario_config, trader_kind)
+                # check if we already returned all required wallets. We do not want to return more than enough.
+                if is_enough_wallets_reported(trader_kind, trader_params, reported_wallets_count):
+                    continue
+
+                reported_wallets_for_trader_kind = reported_wallets_count.get(trader_kind, 0)
+                reported_wallets_count[trader_kind] = reported_wallets_for_trader_kind+1
+
                 trader_balance = 0
                 if trader_pub_key in parties_balances:
                     trader_balance = parties_balances[trader_pub_key]
@@ -230,6 +239,14 @@ class Traders(Handler):
             if len(item.split(":")) >= 2
         }
 
+def is_enough_wallets_reported(trader_type: str, traders_params: any, reported_traders: dict[str, int]) -> bool:
+    """
+    Return true if no more wallets needed.
+    """
+    reported_traders_num = reported_traders.get(trader_type, 0)
+    maximum_traders = getattr(traders_params, "traders", 999999999)
+
+    return maximum_traders <= reported_traders_num
 
 def from_config(
     config: bots.config.types.BotsConfig,
