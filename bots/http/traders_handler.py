@@ -175,7 +175,8 @@ class Traders(Handler):
                 if trader_pub_key in parties_balances:
                     trader_balance = parties_balances[trader_pub_key]
 
-                traders[f"{market_id}_{wallet_name}"] = {
+                trader_key = f"{scenario}_{market_id}_{wallet_name}"
+                traders[trader_key] = {
                     "name": f"{market_id}_{wallet_name}",
                     "pubKey": trader_pub_key,
                     "parameters": {
@@ -198,13 +199,13 @@ class Traders(Handler):
                     public_key = scenario_wallet_state.keys[trader_pub_key].public_key
                     index = scenario_wallet_state.keys[trader_pub_key].index
 
-                traders[f"{market_id}_{wallet_name}"]["wallet"] = {
+                traders[trader_key]["wallet"] = {
                     "index": index,
                     "publicKey": public_key,
                 }
 
                 if scenario_wallet_state is not None and self._is_authenticated():
-                    traders[f"{market_id}_{wallet_name}"]["wallet"][
+                    traders[trader_key]["wallet"][
                         "recoveryPhrase"
                     ] = scenario_wallet_state.recovery_phrase
 
