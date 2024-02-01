@@ -172,6 +172,7 @@ class ScenarioConfig:
     market_name: str
     market_code: str
     binance_code: str
+    feed_price_multiplier: int
     step_length_seconds: int
 
     market_manager: ScenarioMarketManagerConfig
@@ -282,6 +283,7 @@ def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
         market_name=json.get("market_name", ""),
         market_code=json.get("market_code", ""),
         binance_code=json.get("binance_code", ""),
+        feed_price_multiplier=json.get("feed_price_multiplier", 1),
         step_length_seconds=int(json.get("step_length_seconds", 10)),
         market_manager=scenario_market_manager_config_from_json(json.get("market_manager_args", {})),
         market_maker=scenario_market_maker_config_from_json(json.get("market_maker_args", {})),
