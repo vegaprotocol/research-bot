@@ -1,4 +1,4 @@
-FROM python:3.11.4-slim
+FROM python:3.11.8
 
 ENV POETRY_VERSION=1.2.2
 ENV WALLET_VERSION=v0.71.2
@@ -10,9 +10,13 @@ RUN apt-get update \
         wget \
         jq \
         make \
+        gcc \
+        build-essential \
+        libpython3.11-dev \
     && rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
 
 RUN  pip install "poetry==$POETRY_VERSION" \
+    pip install cython \
     && mkdir /research-bots
 
 WORKDIR /research-bots
