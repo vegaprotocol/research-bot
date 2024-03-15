@@ -128,6 +128,7 @@ class ScenarioMarketMakerConfig:
     fee_amount: float
     commitment_amount: int
     initial_mint: int
+    isolated_margin_factor: float
 
 
 @dataclass
@@ -224,6 +225,8 @@ def scenario_market_manager_config_from_json(json: dict[str, any]) -> ScenarioMa
 
 
 def scenario_market_maker_config_from_json(json: dict[str, any]) -> ScenarioMarketMakerConfig:
+    isolated_margin_factor = json.get('isolated_margin_factor', None)
+
     return ScenarioMarketMakerConfig(
         market_kappa=float(json.get("market_kappa", 0.15)),
         market_order_arrival_rate=int(json.get("market_order_arrival_rate", 100)),
@@ -237,6 +240,7 @@ def scenario_market_maker_config_from_json(json: dict[str, any]) -> ScenarioMark
         fee_amount=float(json.get("fee_amount", 0.0001)),
         commitment_amount=int(json.get("commitment_amount", 800000)),
         initial_mint=int(json.get("initial_mint", 200000)),
+        isolated_margin_factor=(None if isolated_margin_factor is None else float(isolated_margin_factor)),
     )
 
 

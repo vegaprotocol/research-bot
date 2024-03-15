@@ -24,16 +24,16 @@ passphrase_file = "./assets/passphrase.txt"
 
 
 [scenario.applemontly]
-    market_name = "Apple Monthly (Jul 2023)"
-    binance_code = "EOSUSDT"
+    market_name = "DogePoint / USDT (Points future market)"
+    binance_code = "DOGEUSDT"
     step_length_seconds = 3
     [scenario.applemontly.market_manager_args]
         market_name = "Apple Monthly (Jul 2023)"
         market_code = "AAPL.MF21"
         asset_name = "tUSDC"
         adp = 6
-        mdp = 4
-        pdp = 0
+        mdp = 5
+        pdp = -2
     [scenario.applemontly.market_maker_args]
         market_kappa = 1000
         market_order_arrival_rate = 100
@@ -52,7 +52,7 @@ passphrase_file = "./assets/passphrase.txt"
         initial_mint = 10000
     [scenario.applemontly.random_trader_args]
         order_intensity = [5, 5, 5, 5, 5, 5]
-        order_volume = [0.01, 0.1, 1.0, 0.01, 0.1, 1.0]
+        order_volume = [1, 100, 1000, 1, 100, 1000]
         step_bias = [0.333, 0.012, 0.003, 0.333, 0.012, 0.003]
         initial_mint = 1000000
     [scenario.applemontly.sensitive_trader_args]

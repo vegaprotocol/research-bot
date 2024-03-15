@@ -147,6 +147,7 @@ def _scenarios_from_config(
                         fee_amount=config[scenario_name].market_maker.fee_amount,
                         commitment_amount=config[scenario_name].market_maker.commitment_amount,
                         initial_mint=config[scenario_name].market_maker.initial_mint,
+                        isolated_margin_factor=config[scenario_name].market_maker.isolated_margin_factor,
                     ),
                     auction_trader_args=AuctionTraderArgs(
                         initial_volume=config[scenario_name].auction_trader.initial_volume,
