@@ -1099,8 +1099,8 @@ profile = ["pytest-profiling", "snakeviz"]
 [package.source]
 type = "git"
 url = "https://github.com/vegaprotocol/vega-market-sim.git"
-reference = "857eee5d426191e1f97dc0e47a1ba8eeba079f51"
-resolved_reference = "857eee5d426191e1f97dc0e47a1ba8eeba079f51"
+reference = "8d293c468055289493b300e91312aede13a2debc"
+resolved_reference = "8d293c468055289493b300e91312aede13a2debc"
 
 [[package]]
 name = "waitress"
@@ -1355,4 +1355,4 @@ protobuf = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "917d9132157cce58ac78aa00e394265ee962c0190fe31cc1003197dc278f6870"
+content-hash = "d4bb8e2082f407039b49cf7419c4db436674035207212f79dcb3377efbab0076"
