@@ -6,11 +6,56 @@ import bots.api.types
 from typing import Optional
 from bots.api.http import get_call
 
+def get_max_core_height(endpoints: list[str]) -> int:
+    max_height = 0
+    for endpoint in endpoints:
+        try:
+            # get statistics for each endpoints
+            stats = get_statistics([endpoint])
+            if "blockHeight" in stats and int(stats["blockHeight"]) > max_height:
+                max_height = int(stats["blockHeight"])
+        except:
+            pass # we do not care about errors here...
+        
+    if max_height < 1:
+        raise requests.RequestException("cannot get max network height, all available nodes did not return valid response for the /statistics endpoint")
+
+    return max_height
+
+def get_healthy_endpoints(endpoints: list[str]) -> list[str]:
+    max_allowed_lag_blocks = 500
+    result = []
+    
+    max_core_height = get_max_core_height(endpoints)
+    
+    for endpoint in endpoints:
+        try:
+            stats = get_statistics([endpoint])
+
+            if not "blockHeight" in stats:
+                continue
+
+            core_height = int(stats["blockHeight"])
+            if core_height < max_core_height and max_core_height - core_height > max_allowed_lag_blocks:
+                continue
+
+            # if data-node check its block as well
+            if "x-block-height" in stats:
+                data_node_height = int(stats["x-block-height"])
+
+                if data_node_height < max_core_height and max_core_height - data_node_height > max_allowed_lag_blocks:
+                    continue
+            
+            result.append(endpoint)
+        except:
+            pass
+
+    return result
 
 def get_markets(endpoints: list[str]) -> any:
     for endpoint in endpoints:
         try:
-            json_resp = get_call(f"{endpoint}/api/v2/markets")
+            json_resp = get_call(f"{endpoint}/api/v2/markets")[0]
         except:
             continue
 
@@ -34,16 +79,22 @@ def check_market_exists(endpoints: list[str], market_names: list[str]):
 
 
 def get_statistics(endpoints: list[str]) -> dict[str, any]:
+    response = ([], dict())
     for endpoint in endpoints:
         try:
-            json_resp = get_call(f"{endpoint}/statistics")
+            response = get_call(f"{endpoint}/statistics")
         except:
             continue
 
-        if not "statistics" in json_resp:
+        if len(response) < 1 or "statistics" not in response[0]:
             continue
 
-        return json_resp["statistics"]
+        result = response[0]["statistics"]
+        # append data-node height to the response
+        if len(response) > 1 and "x-block-height" in response[1]:
+            result["x-block-height"] = response[1]["x-block-height"]
+
+        return result
 
     raise requests.RequestException("all endpoints for /statistics did not return a valid response")
 
@@ -51,7 +102,7 @@ def get_statistics(endpoints: list[str]) -> dict[str, any]:
 def get_assets(endpoints: list[str]) -> dict[str, any]:
     for endpoint in endpoints:
         try:
-            json_resp = get_call(f"{endpoint}/api/v2/assets")
+            json_resp = get_call(f"{endpoint}/api/v2/assets")[0]
         except:
             continue
 
@@ -94,7 +145,7 @@ def get_accounts(
 
     for endpoint in endpoints:
         try:
-            json_resp = get_call(f"{endpoint}/{url}")
+            json_resp = get_call(f"{endpoint}/{url}")[0]
         except:
             continue
 

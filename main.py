@@ -9,7 +9,7 @@ from bots.http.traders_handler import from_config as traders_from_config
 from bots.services.vega_wallet import from_config as wallet_from_config
 from bots.vega_sim.scenario_wallet import from_config as scenario_wallet_from_config
 from bots.config.environment import check_env_variables
-from bots.api.datanode import check_market_exists, get_statistics
+from bots.api.datanode import check_market_exists, get_statistics, get_healthy_endpoints
 from bots.tools.github import download_and_unzip_github_asset
 from bots.config.types import load_network_config, read_bots_config
 from bots.wallet.cli import VegaWalletCli
@@ -32,8 +32,12 @@ def main():
     scenarios_config = config.scenarios
 
     rest_api_endpoints = config.network_config.api.rest.hosts
+    healthy_rest_endpoints = get_healthy_endpoints(rest_api_endpoints)
+    if len(healthy_rest_endpoints) < 1:
+        raise Exception("There is no healthy rest data-node in the network")
+
     required_market_names = [scenarios_config[scenario_name].market_name for scenario_name in scenarios_config]
-    statistics = get_statistics(rest_api_endpoints)
+    statistics = get_statistics(healthy_rest_endpoints)
 
     wallet_mutex = None
 
@@ -71,7 +75,7 @@ def main():
     scenario_wallets = dict()
     try:
         check_env_variables()
-        check_market_exists(rest_api_endpoints, required_market_names)
+        check_market_exists(healthy_rest_endpoints, required_market_names)
         scenario_wallets = scenario_wallet_from_config(config.scenarios, cli_wallet)
         traders_svc = traders_from_config(config, cli_wallet, scenario_wallets, tokens_list)
         bots.http.app.handler(path="/traders", handler_func=lambda: traders_svc.serve())

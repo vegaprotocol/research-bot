@@ -2,7 +2,7 @@ import requests
 import logging
 
 
-def get_call(endpoint: str) -> any:
+def get_call(endpoint: str) -> tuple[any, dict[str, str]]:
     endpoint_url = endpoint if "http" in endpoint else f"https://{endpoint}"
 
     logging.debug(f"Making GET call to {endpoint_url}")
@@ -17,4 +17,4 @@ def get_call(endpoint: str) -> any:
         err = str(e)
         logging.debug(f"Failed to get response from {endpoint_url}: {err}")
         raise e
-    return resp.json()
+    return (resp.json(), resp.headers)
