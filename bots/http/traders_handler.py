@@ -9,6 +9,7 @@ import bots.config.types
 
 from vega_sim.devops.wallet import ScenarioWallet
 from typing import Optional
+from bots.api.datanode import get_healthy_endpoints
 from bots.api.helpers import by_key
 from bots.http.handler import Handler
 from bots.wallet.cli import VegaWalletCli
@@ -333,11 +334,16 @@ def from_config(
     scenario_wallets: dict[str, ScenarioWallet],
     tokens: list[str],
 ) -> Traders:
+    healthy_rest_endpoints = get_healthy_endpoints(config.network_config.api.rest.hosts)
+    if len(healthy_rest_endpoints) < 1:
+        raise Exception("There is no healthy rest data-node in the network when creating Traders from config")
+
+
     return Traders(
         host=config.http_server.interface,
         port=config.http_server.port,
         scenarios=config.scenarios,
-        api_endpoints=config.network_config.api.rest.hosts,
+        api_endpoints=healthy_rest_endpoints,
         wallet=wallet_cli,
         wallet_name=config.wallet.wallet_name,
         scenario_wallets=scenario_wallets,
