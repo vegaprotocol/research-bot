@@ -6,9 +6,9 @@ authors = ["ops <ops@vega.xyz>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = "^3.10,<3.12"
 # https://python-poetry.org/docs/dependency-specification/#git-dependencies
-vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", rev = "6f64a25f29c8b6cb309da772d654fc1f4d596d3c" }
+vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", rev = "3c54a21c7a5eb9a11e5bf1a3180f10aa5ccbda54" }
 # vega_sim = { path = "../vega-market-sim", develop = true }
 flask = "^2.3.3"
 waitress = "^2.1.2"

@@ -172,7 +172,8 @@ class ScenarioConfig:
     enable_top_up: bool
     market_name: str
     market_code: str
-    binance_code: str
+    price_symbol: str
+    price_source: str
     feed_price_multiplier: int
     step_length_seconds: int
 
@@ -285,8 +286,9 @@ def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
     return ScenarioConfig(
         enable_top_up=bool(json.get("enable_top_up", True)),
         market_name=json.get("market_name", ""),
-        market_code=json.get("market_code", ""),
-        binance_code=json.get("binance_code", ""),
+        market_code=json.get("market_code", ""),    
+        price_symbol=json.get("price_symbol", ""),
+        price_source=json.get("price_source", ""),
         feed_price_multiplier=json.get("feed_price_multiplier", 1),
         step_length_seconds=int(json.get("step_length_seconds", 10)),
         market_manager=scenario_market_manager_config_from_json(json.get("market_manager_args", {})),
