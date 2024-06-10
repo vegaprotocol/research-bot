@@ -128,7 +128,8 @@ def _scenarios_from_config(
         result.update(
             {
                 f"{scenario_name}": DevOpsScenario(
-                    binance_code=config[scenario_name].binance_code,
+                    price_symbol=config[scenario_name].price_symbol,
+                    price_source=config[scenario_name].price_source,
                     feed_price_multiplier=config[scenario_name].feed_price_multiplier,
                     market_manager_args=MarketManagerArgs(
                         # market_name=config[scenario_name].market_name,

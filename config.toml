@@ -25,7 +25,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.applemontly]
     market_name = "DogePoint / USDT (Points future market)"
-    binance_code = "DOGEUSDT"
+    price_symbol = "DOGEUSDT"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.applemontly.market_manager_args]
         market_name = "Apple Monthly (Jul 2023)"
@@ -69,7 +70,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.tsla_quarterly]
     market_name = "Tesla Quarterly (Sep 2023)"
-    binance_code = "BNBEUR"
+    price_symbol = "BNBEUR"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.tsla_quarterly.market_manager_args]
         market_name = "Tesla Quarterly (Sep 2023)"
@@ -113,7 +115,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.btcusd_perpetual]
     market_name = "BTCUSD Perpetual Futures"
-    binance_code = "BTCDAI"
+    price_symbol = "BTCDAI"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.btcusd_perpetual.market_manager_args]
         market_name = "BTCUSD Perpetual Futures"
@@ -156,7 +159,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.ethusdt_perpetual]
     market_name = "ETHUSD Perpetual"
-    binance_code = "ETHDAI"
+    price_symbol = "ETHDAI"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.ethusdt_perpetual.market_manager_args]
         market_name = "ETHUSD Perpetual"
@@ -199,7 +203,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.daiusd_perpetual]
     market_name = "DAIUSD Perpetual"
-    binance_code = "DAIUSDT"
+    price_symbol = "DAIUSDT"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.daiusd_perpetual.market_manager_args]
         market_name = "DAIUSD Perpetual"
@@ -242,7 +247,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.btcusdt_monthly]
     market_name = "BTCUSD Monthly (Jul 2023)"
-    binance_code = "BTCDAI"
+    price_symbol = "BTCDAI"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.btcusdt_monthly.market_manager_args]
         market_name = "BTCUSD Monthly (Jul 2023)"
@@ -285,7 +291,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.eurusd_perpetual]
     market_name = "EURUSD Perpetual"
-    binance_code = "EURUSDT"
+    price_symbol = "EURUSDT"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.eurusd_perpetual.market_manager_args]
         market_name = "EURUSD Perpetual"
@@ -328,7 +335,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.aavedai]
     market_name = "AAVEDAI Monthly (Jul 2023)"
-    binance_code = "AAVEUSDT"
+    price_symbol = "AAVEUSDT"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.aavedai.market_manager_args]
         market_name = "AAVEDAI Monthly (Jul 2023)"
@@ -371,7 +379,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.ethbtc_quarterly]
     market_name = "ETHBTC Quarterly (Sep 2023)"
-    binance_code = "ETHBTC"
+    price_symbol = "ETHBTC"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.ethbtc_quarterly.market_manager_args]
         market_name = "ETHBTC Quarterly (Sep 2023)"
@@ -414,7 +423,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.linkusdt_perpetual]
     market_name = "LINKUSD Perpetual"
-    binance_code = "LINKUSDT"
+    price_symbol = "LINKUSDT"
+    price_source = "binance"
     step_length_seconds = 1
     [scenario.linkusdt_perpetual.market_manager_args]
         market_name = "LINKUSD Perpetual"
@@ -457,7 +467,8 @@ passphrase_file = "./assets/passphrase.txt"
 
 [scenario.ehtdai_monthly]
     market_name = "ETHDAI Monthly (Jul 2023)"
-    binance_code = "ETHDAI"
+    price_symbol = "ETHDAI"
+    price_source = "binance"
     step_length_seconds = 3
     [scenario.ehtdai_monthly.market_manager_args]
         market_name = "ETHDAI Monthly (Jul 2023)"
