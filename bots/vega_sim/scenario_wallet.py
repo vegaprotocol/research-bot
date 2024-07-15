@@ -16,6 +16,7 @@ def from_config(
                     market_creator_agent=Agent(key_name=f"market_creator", wallet_name=scenario_name),
                     market_settler_agent=Agent(key_name=f"market_settler", wallet_name=scenario_name),
                     market_maker_agent=Agent(key_name=f"market_maker", wallet_name=scenario_name),
+                    automated_market_maker_agent=Agent(key_name=f"automated_market_maker", wallet_name=scenario_name),
                     auction_trader_agents=[
                         Agent(key_name=f"auction_trader_{trader}", wallet_name=scenario_name)
                         for trader in range(scenarios_config[scenario_name].auction_trader.traders)
@@ -70,6 +71,14 @@ def from_config(
             )
             wallet_cli.generate_key(
                 scenario_wallet.market_maker_agent.wallet_name, scenario_wallet.market_maker_agent.key_name
+            )
+
+        if not scenario_wallet.automated_market_maker_agent.key_name in wallet_keys:
+            logging.info(
+                f"Creating the {scenario_wallet.automated_market_maker_agent.key_name} key pair in the {scenario_wallet.automated_market_maker_agent.wallet_name} wallet"
+            )
+            wallet_cli.generate_key(
+                scenario_wallet.automated_market_maker_agent.wallet_name, scenario_wallet.automated_market_maker_agent.key_name
             )
 
         for agent in scenario_wallet.auction_trader_agents:
