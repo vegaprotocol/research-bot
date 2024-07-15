@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10,<3.12"
 # https://python-poetry.org/docs/dependency-specification/#git-dependencies
-vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", rev = "3c54a21c7a5eb9a11e5bf1a3180f10aa5ccbda54" }
+vega_sim = { git = "https://github.com/vegaprotocol/vega-market-sim.git", rev = "6d35266dd8a2dea88aa39b9d23508ba43d47c0bf" }
 # vega_sim = { path = "../vega-market-sim", develop = true }
 flask = "^2.3.3"
 waitress = "^2.1.2"
