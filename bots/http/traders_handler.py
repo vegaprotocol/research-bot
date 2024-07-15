@@ -17,12 +17,12 @@ from dataclasses import dataclass, asdict
 
 
 def is_trader(wallet_name: str) -> bool:
-    trader_names = ["market_maker", "auction_trader", "random_trader", "sensitive_trader"]
+    trader_names = ["market_maker", "automated_market_maker", "auction_trader", "random_trader", "sensitive_trader"]
     return any([trader_name in wallet_name for trader_name in trader_names])
 
 
 def get_config_attr_name(wallet_name: str) -> str:
-    trader_names = ["market_maker", "auction_trader", "random_trader", "sensitive_trader"]
+    trader_names = ["automated_market_maker", "market_maker", "auction_trader", "random_trader", "sensitive_trader"]
     for trader_name in trader_names:
         if trader_name in wallet_name:
             return trader_name
