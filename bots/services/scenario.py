@@ -21,6 +21,7 @@ from vega_sim.devops.classes import (
     RandomTraderArgs,
     SensitiveTraderArgs,
     SimulationArgs,
+    AutomatedMarketMakerArgs,
 )
 
 from vega_sim.api.market import MarketConfig
@@ -161,6 +162,17 @@ def _scenarios_from_config(
                         commitment_amount=config[scenario_name].market_maker.commitment_amount,
                         initial_mint=config[scenario_name].market_maker.initial_mint,
                         isolated_margin_factor=config[scenario_name].market_maker.isolated_margin_factor,
+                    ),
+                    automated_market_maker_args=AutomatedMarketMakerArgs(
+                        commitment_amount=config[scenario_name].automated_market_maker.commitment_amount,
+                        proposed_fee=config[scenario_name].automated_market_maker.proposed_fee,
+                        lower_bound_scaling=config[scenario_name].automated_market_maker.lower_bound_scaling,
+                        upper_bound_scaling=config[scenario_name].automated_market_maker.upper_bound_scaling,
+                        leverage_at_lower_bound=config[scenario_name].automated_market_maker.leverage_at_lower_bound,
+                        leverage_at_upper_bound=config[scenario_name].automated_market_maker.leverage_at_upper_bound,
+                        update_bias=config[scenario_name].automated_market_maker.update_bias,
+                        slippage_tolerance=config[scenario_name].automated_market_maker.slippage_tolerance,
+                        initial_mint=config[scenario_name].automated_market_maker.initial_mint,
                     ),
                     auction_trader_args=AuctionTraderArgs(
                         initial_volume=config[scenario_name].auction_trader.initial_volume,

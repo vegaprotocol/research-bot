@@ -166,6 +166,17 @@ class ScenarioSimulationConfig:
     start_date: str
     randomise_history: bool
 
+@dataclass
+class ScenarioAutomatedMarketMaker:
+    commitment_amount: int
+    proposed_fee: float
+    lower_bound_scaling: float
+    upper_bound_scaling: float
+    leverage_at_lower_bound: float
+    leverage_at_upper_bound: float
+    update_bias: float
+    slippage_tolerance: float
+    initial_mint: int
 
 @dataclass
 class ScenarioConfig:
@@ -179,6 +190,7 @@ class ScenarioConfig:
 
     market_manager: ScenarioMarketManagerConfig
     market_maker: ScenarioMarketMakerConfig
+    automated_market_maker: ScenarioAutomatedMarketMaker
     auction_trader: ScenarioAuctionTraderConfig
     random_trader: ScenarioRandomTraderConfig
     sensitive_trader: ScenarioSensitiveTraderConfig
@@ -282,6 +294,20 @@ def scenario_simulation_config_from_json(json: dict[str, any]) -> ScenarioSimula
     )
 
 
+def scenario_automated_market_maker_config_from_json(json: dict[str, any]) -> ScenarioAutomatedMarketMaker:
+    return ScenarioAutomatedMarketMaker(
+        commitment_amount=int(json.get("commitment_amount", 100000)),
+        proposed_fee=float(json.get("proposed_fee", 0.0001)),
+        lower_bound_scaling=float(json.get("lower_bound_scaling", 0.9)),
+        upper_bound_scaling=float(json.get("upper_bound_scaling", 1.1)),
+        leverage_at_lower_bound=float(json.get("leverage_at_lower_bound", 20)),
+        leverage_at_upper_bound=float(json.get("leverage_at_upper_bound", 20)),
+        update_bias=float(json.get("update_bias", 0.001)),
+        slippage_tolerance=float(json.get("slippage_tolerance", 0.5)),
+        initial_mint=int(json.get("initial_mint", 200000)),
+    )
+
+
 def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
     return ScenarioConfig(
         enable_top_up=bool(json.get("enable_top_up", True)),
@@ -293,6 +319,7 @@ def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
         step_length_seconds=int(json.get("step_length_seconds", 10)),
         market_manager=scenario_market_manager_config_from_json(json.get("market_manager_args", {})),
         market_maker=scenario_market_maker_config_from_json(json.get("market_maker_args", {})),
+        automated_market_maker=scenario_automated_market_maker_config_from_json(json.get("automated_market_maker_args", {})),
         auction_trader=scenario_auction_trader_config_from_json(json.get("auction_trader_args", {})),
         random_trader=scenario_random_trader_config_from_json(json.get("random_trader_args", {})),
         sensitive_trader=scenario_sensitive_trader_config_from_json(json.get("sensitive_trader_args", [])),
