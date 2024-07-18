@@ -78,7 +78,8 @@ def from_config(
                 f"Creating the {scenario_wallet.automated_market_maker_agent.key_name} key pair in the {scenario_wallet.automated_market_maker_agent.wallet_name} wallet"
             )
             wallet_cli.generate_key(
-                scenario_wallet.automated_market_maker_agent.wallet_name, scenario_wallet.automated_market_maker_agent.key_name
+                scenario_wallet.automated_market_maker_agent.wallet_name,
+                scenario_wallet.automated_market_maker_agent.key_name,
             )
 
         for agent in scenario_wallet.auction_trader_agents:

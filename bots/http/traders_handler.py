@@ -30,7 +30,9 @@ def get_config_attr_name(wallet_name: str) -> str:
     raise RuntimeError(f"Attribute unknown for {wallet_name}")
 
 
-def _get_party_id_to_wanted_token_map(scenario_config: bots.config.types.ScenarioConfig, wallet_keys: dict[str, str]) -> dict[str, float]:
+def _get_party_id_to_wanted_token_map(
+    scenario_config: bots.config.types.ScenarioConfig, wallet_keys: dict[str, str]
+) -> dict[str, float]:
     result = {}
 
     for wallet_name in wallet_keys:
@@ -44,6 +46,7 @@ def _get_party_id_to_wanted_token_map(scenario_config: bots.config.types.Scenari
 
     return result
 
+
 @dataclass
 class WantedToken:
     party_id: str
@@ -52,6 +55,7 @@ class WantedToken:
     asset_erc20_address: str
     balance: float
     wanted_tokens: float
+
 
 @dataclass
 class WalletWantedTokens:
@@ -196,7 +200,7 @@ class Traders(Handler):
                     continue
 
                 reported_wallets_for_trader_kind = reported_wallets_count.get(trader_kind, 0)
-                reported_wallets_count[trader_kind] = reported_wallets_for_trader_kind+1
+                reported_wallets_count[trader_kind] = reported_wallets_for_trader_kind + 1
 
                 trader_key = f"{scenario}_{market_id}_{wallet_name}"
                 traders[trader_key] = {
@@ -229,20 +233,22 @@ class Traders(Handler):
                 }
 
                 if scenario_wallet_state is not None and self._is_authenticated():
-                    traders[trader_key]["wallet"][
-                        "recoveryPhrase"
-                    ] = scenario_wallet_state.recovery_phrase
+                    traders[trader_key]["wallet"]["recoveryPhrase"] = scenario_wallet_state.recovery_phrase
 
         return traders
 
-    def _compute_wanted_tokens_for_wallet(self, market_id: str, assets_ids: list[str], wallet_keys: list[str], party_id_to_wanted_balance_map: dict[str, float]) -> WalletWantedTokens:
+    def _compute_wanted_tokens_for_wallet(
+        self,
+        market_id: str,
+        assets_ids: list[str],
+        wallet_keys: list[str],
+        party_id_to_wanted_balance_map: dict[str, float],
+    ) -> WalletWantedTokens:
         entries = []
 
         for asset_id in assets_ids:
             if not asset_id in self.assets:
-                Traders.logger.error(
-                    f"Missing asset {asset_id} on the network"
-                )
+                Traders.logger.error(f"Missing asset {asset_id} on the network")
 
                 raise RuntimeError(f"Missing asset {asset_id} on the network")
             asset = self.assets[asset_id]
@@ -262,23 +268,28 @@ class Traders(Handler):
                     party_to_balance_map[account.owner] = 0.0
 
                 if account.market_id not in ["", market_id]:
-                        continue
+                    continue
 
                 if not account.type in ["ACCOUNT_TYPE_GENERAL", "ACCOUNT_TYPE_MARGIN", "ACCOUNT_TYPE_BOND"]:
                     continue
 
-                party_to_balance_map[account.owner] += float(account.balance) / (pow(10, int(asset["details"]["decimals"])))
-
+                party_to_balance_map[account.owner] += float(account.balance) / (
+                    pow(10, int(asset["details"]["decimals"]))
+                )
 
             for party_id in wallet_keys:
                 entries = entries + [
                     WantedToken(
-                        party_id=party_id, 
-                        symbol=asset["details"]["symbol"], 
+                        party_id=party_id,
+                        symbol=asset["details"]["symbol"],
                         vega_asset_id=asset["id"],
                         asset_erc20_address=asset["details"]["erc20"]["contractAddress"],
                         balance=(party_to_balance_map[party_id] if party_id in party_to_balance_map else 0.0),
-                        wanted_tokens=(party_id_to_wanted_balance_map[party_id] if party_id in party_id_to_wanted_balance_map else 0.0),
+                        wanted_tokens=(
+                            party_id_to_wanted_balance_map[party_id]
+                            if party_id in party_id_to_wanted_balance_map
+                            else 0.0
+                        ),
                     )
                 ]
 
@@ -319,6 +330,7 @@ class Traders(Handler):
             if len(item.split(":")) >= 2
         }
 
+
 def is_enough_wallets_reported(trader_type: str, traders_params: any, reported_traders: dict[str, int]) -> bool:
     """
     Return true if no more wallets needed.
@@ -327,6 +339,7 @@ def is_enough_wallets_reported(trader_type: str, traders_params: any, reported_t
     maximum_traders = getattr(traders_params, "traders", 999999999)
 
     return maximum_traders <= reported_traders_num
+
 
 def from_config(
     config: bots.config.types.BotsConfig,
@@ -337,7 +350,6 @@ def from_config(
     healthy_rest_endpoints = get_healthy_endpoints(config.network_config.api.rest.hosts)
     if len(healthy_rest_endpoints) < 1:
         raise Exception("There is no healthy rest data-node in the network when creating Traders from config")
-
 
     return Traders(
         host=config.http_server.interface,

@@ -6,6 +6,7 @@ import bots.api.types
 from typing import Optional
 from bots.api.http import get_call
 
+
 def get_max_core_height(endpoints: list[str]) -> int:
     max_height = 0
     for endpoint in endpoints:
@@ -15,19 +16,22 @@ def get_max_core_height(endpoints: list[str]) -> int:
             if "blockHeight" in stats and int(stats["blockHeight"]) > max_height:
                 max_height = int(stats["blockHeight"])
         except:
-            pass # we do not care about errors here...
-        
+            pass  # we do not care about errors here...
+
     if max_height < 1:
-        raise requests.RequestException("cannot get max network height, all available nodes did not return valid response for the /statistics endpoint")
+        raise requests.RequestException(
+            "cannot get max network height, all available nodes did not return valid response for the /statistics endpoint"
+        )
 
     return max_height
+
 
 def get_healthy_endpoints(endpoints: list[str]) -> list[str]:
     max_allowed_lag_blocks = 500
     result = []
-    
+
     max_core_height = get_max_core_height(endpoints)
-    
+
     for endpoint in endpoints:
         try:
             stats = get_statistics([endpoint])
@@ -45,12 +49,13 @@ def get_healthy_endpoints(endpoints: list[str]) -> list[str]:
 
                 if data_node_height < max_core_height and max_core_height - data_node_height > max_allowed_lag_blocks:
                     continue
-            
+
             result.append(endpoint)
         except:
             pass
 
     return result
+
 
 def get_markets(endpoints: list[str]) -> any:
     for endpoint in endpoints:
@@ -166,8 +171,14 @@ def get_accounts(
                 )
             )
 
-        if "pageInfo" in json_resp["accounts"] and "hasNextPage" in json_resp["accounts"]["pageInfo"] and json_resp["accounts"]["pageInfo"]["hasNextPage"]:
-            return response + get_accounts(endpoints, asset_id, parties, market_ids, json_resp["accounts"]["pageInfo"]["endCursor"])
+        if (
+            "pageInfo" in json_resp["accounts"]
+            and "hasNextPage" in json_resp["accounts"]["pageInfo"]
+            and json_resp["accounts"]["pageInfo"]["hasNextPage"]
+        ):
+            return response + get_accounts(
+                endpoints, asset_id, parties, market_ids, json_resp["accounts"]["pageInfo"]["endCursor"]
+            )
 
         return response
 

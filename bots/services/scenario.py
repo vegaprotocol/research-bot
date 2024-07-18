@@ -25,6 +25,7 @@ from vega_sim.devops.classes import (
 )
 
 from vega_sim.api.market import MarketConfig
+
 # , SpotMarketConfig
 
 
@@ -67,7 +68,6 @@ class ScenarioService(Service):
 
             time.sleep(3)
 
-
     @threaded
     def start(self):
         self.logger.info("Starting scenario")
@@ -106,7 +106,6 @@ def services_from_config(
     )
     for scenario_name in scenarios:
 
-
         services.append(
             ScenarioService(
                 scenario_name,
@@ -139,14 +138,16 @@ def _scenarios_from_config(
                         # adp=config[scenario_name].market_manager.adp,
                         # mdp=config[scenario_name].market_manager.mdp,
                         # pdp=config[scenario_name].market_manager.pdp,
-                        market_config=MarketConfig({
-                            "decimalPlaces": str(config[scenario_name].market_manager.mdp),
-                            "positionDecimalPlaces": str(config[scenario_name].market_manager.pdp),
-                            "instrument": {
-                                "code": config[scenario_name].market_code,
-                                "name": config[scenario_name].market_name,
+                        market_config=MarketConfig(
+                            {
+                                "decimalPlaces": str(config[scenario_name].market_manager.mdp),
+                                "positionDecimalPlaces": str(config[scenario_name].market_manager.pdp),
+                                "instrument": {
+                                    "code": config[scenario_name].market_code,
+                                    "name": config[scenario_name].market_name,
+                                },
                             }
-                        })
+                        )
                     ),
                     market_maker_args=MarketMakerArgs(
                         market_kappa=config[scenario_name].market_maker.market_kappa,

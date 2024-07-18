@@ -166,6 +166,7 @@ class ScenarioSimulationConfig:
     start_date: str
     randomise_history: bool
 
+
 @dataclass
 class ScenarioAutomatedMarketMaker:
     commitment_amount: int
@@ -177,6 +178,7 @@ class ScenarioAutomatedMarketMaker:
     update_bias: float
     slippage_tolerance: float
     initial_mint: int
+
 
 @dataclass
 class ScenarioConfig:
@@ -238,7 +240,7 @@ def scenario_market_manager_config_from_json(json: dict[str, any]) -> ScenarioMa
 
 
 def scenario_market_maker_config_from_json(json: dict[str, any]) -> ScenarioMarketMakerConfig:
-    isolated_margin_factor = json.get('isolated_margin_factor', None)
+    isolated_margin_factor = json.get("isolated_margin_factor", None)
 
     return ScenarioMarketMakerConfig(
         market_kappa=float(json.get("market_kappa", 0.15)),
@@ -312,14 +314,16 @@ def scenario_config_from_json(json: dict[str, any]) -> ScenarioConfig:
     return ScenarioConfig(
         enable_top_up=bool(json.get("enable_top_up", True)),
         market_name=json.get("market_name", ""),
-        market_code=json.get("market_code", ""),    
+        market_code=json.get("market_code", ""),
         price_symbol=json.get("price_symbol", ""),
         price_source=json.get("price_source", ""),
         feed_price_multiplier=json.get("feed_price_multiplier", 1),
         step_length_seconds=int(json.get("step_length_seconds", 10)),
         market_manager=scenario_market_manager_config_from_json(json.get("market_manager_args", {})),
         market_maker=scenario_market_maker_config_from_json(json.get("market_maker_args", {})),
-        automated_market_maker=scenario_automated_market_maker_config_from_json(json.get("automated_market_maker_args", {})),
+        automated_market_maker=scenario_automated_market_maker_config_from_json(
+            json.get("automated_market_maker_args", {})
+        ),
         auction_trader=scenario_auction_trader_config_from_json(json.get("auction_trader_args", {})),
         random_trader=scenario_random_trader_config_from_json(json.get("random_trader_args", {})),
         sensitive_trader=scenario_sensitive_trader_config_from_json(json.get("sensitive_trader_args", [])),
@@ -388,8 +392,8 @@ def config_from_json(json: dict[str, any]) -> BotsConfig:
 
 
 ##
- # Network config aka wallet toml config
- ##
+# Network config aka wallet toml config
+##
 def api_network_config_from_dict(data: dict[str, any]) -> ProtocolAPINetworkConfig:
     retries = data.get("Retries", None)
 
