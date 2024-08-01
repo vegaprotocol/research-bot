@@ -21,9 +21,11 @@ from vega_sim.devops.classes import (
     RandomTraderArgs,
     SensitiveTraderArgs,
     SimulationArgs,
+    AutomatedMarketMakerArgs,
 )
 
 from vega_sim.api.market import MarketConfig
+
 # , SpotMarketConfig
 
 
@@ -66,7 +68,6 @@ class ScenarioService(Service):
 
             time.sleep(3)
 
-
     @threaded
     def start(self):
         self.logger.info("Starting scenario")
@@ -105,7 +106,6 @@ def services_from_config(
     )
     for scenario_name in scenarios:
 
-
         services.append(
             ScenarioService(
                 scenario_name,
@@ -138,14 +138,16 @@ def _scenarios_from_config(
                         # adp=config[scenario_name].market_manager.adp,
                         # mdp=config[scenario_name].market_manager.mdp,
                         # pdp=config[scenario_name].market_manager.pdp,
-                        market_config=MarketConfig({
-                            "decimalPlaces": str(config[scenario_name].market_manager.mdp),
-                            "positionDecimalPlaces": str(config[scenario_name].market_manager.pdp),
-                            "instrument": {
-                                "code": config[scenario_name].market_code,
-                                "name": config[scenario_name].market_name,
+                        market_config=MarketConfig(
+                            {
+                                "decimalPlaces": str(config[scenario_name].market_manager.mdp),
+                                "positionDecimalPlaces": str(config[scenario_name].market_manager.pdp),
+                                "instrument": {
+                                    "code": config[scenario_name].market_code,
+                                    "name": config[scenario_name].market_name,
+                                },
                             }
-                        })
+                        )
                     ),
                     market_maker_args=MarketMakerArgs(
                         market_kappa=config[scenario_name].market_maker.market_kappa,
@@ -161,6 +163,17 @@ def _scenarios_from_config(
                         commitment_amount=config[scenario_name].market_maker.commitment_amount,
                         initial_mint=config[scenario_name].market_maker.initial_mint,
                         isolated_margin_factor=config[scenario_name].market_maker.isolated_margin_factor,
+                    ),
+                    automated_market_maker_args=AutomatedMarketMakerArgs(
+                        commitment_amount=config[scenario_name].automated_market_maker.commitment_amount,
+                        proposed_fee=config[scenario_name].automated_market_maker.proposed_fee,
+                        lower_bound_scaling=config[scenario_name].automated_market_maker.lower_bound_scaling,
+                        upper_bound_scaling=config[scenario_name].automated_market_maker.upper_bound_scaling,
+                        leverage_at_lower_bound=config[scenario_name].automated_market_maker.leverage_at_lower_bound,
+                        leverage_at_upper_bound=config[scenario_name].automated_market_maker.leverage_at_upper_bound,
+                        update_bias=config[scenario_name].automated_market_maker.update_bias,
+                        slippage_tolerance=config[scenario_name].automated_market_maker.slippage_tolerance,
+                        initial_mint=config[scenario_name].automated_market_maker.initial_mint,
                     ),
                     auction_trader_args=AuctionTraderArgs(
                         initial_volume=config[scenario_name].auction_trader.initial_volume,

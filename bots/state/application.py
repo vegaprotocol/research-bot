@@ -14,4 +14,4 @@ class ApplicationState:
         """
         result = bots.config.types.ScenariosConfigType()
         for scenario_name, scenario_config in self._config.scenarios.items():
-            
+            pass
