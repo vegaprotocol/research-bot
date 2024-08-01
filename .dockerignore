@@ -1,0 +1,9 @@
+.idea
+.vscode
+.venv
+data
+mounts
+tests
+network
+wallethome
+wallets-home-*
