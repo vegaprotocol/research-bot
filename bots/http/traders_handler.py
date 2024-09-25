@@ -95,7 +95,7 @@ class Traders(Handler):
 
         # TODO: filter by valid market statuses
         self.markets = by_key(
-            bots.api.datanode.get_markets(api_endpoints),
+            bots.api.datanode.get_markets(api_endpoints, exclude_statuses=['STATE_SUSPENDED', 'STATE_CLOSED', 'STATE_TERMINATED']),
             lambda market: market["tradableInstrument"]["instrument"]["name"],
         )
         self.assets = by_key(bots.api.datanode.get_assets(api_endpoints), lambda asset: asset["id"])

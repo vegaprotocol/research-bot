@@ -57,7 +57,7 @@ def get_healthy_endpoints(endpoints: list[str]) -> list[str]:
     return result
 
 
-def get_markets(endpoints: list[str]) -> any:
+def get_markets(endpoints: list[str], exclude_statuses = []) -> any:
     for endpoint in endpoints:
         try:
             json_resp = get_call(f"{endpoint}/api/v2/markets")[0]
@@ -67,7 +67,7 @@ def get_markets(endpoints: list[str]) -> any:
         if not "markets" in json_resp:
             continue
 
-        return [market["node"] for market in json_resp["markets"]["edges"]]
+        return [market["node"] for market in json_resp["markets"]["edges"] if market["node"]['state'] not in exclude_statuses]
 
     raise requests.RequestException("all endpoints for /api/v2/markets did not return a valid response")
 
