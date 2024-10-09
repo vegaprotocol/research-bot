@@ -169,6 +169,7 @@ class ScenarioSimulationConfig:
 
 @dataclass
 class ScenarioAutomatedMarketMaker:
+    enabled: bool
     commitment_amount: int
     proposed_fee: float
     lower_bound_scaling: float
@@ -298,6 +299,7 @@ def scenario_simulation_config_from_json(json: dict[str, any]) -> ScenarioSimula
 
 def scenario_automated_market_maker_config_from_json(json: dict[str, any]) -> ScenarioAutomatedMarketMaker:
     return ScenarioAutomatedMarketMaker(
+        enabled=bool(json.get("enabled", False)),
         commitment_amount=int(json.get("commitment_amount", 100000)),
         proposed_fee=float(json.get("proposed_fee", 0.0001)),
         lower_bound_scaling=float(json.get("lower_bound_scaling", 0.9)),
