@@ -20,7 +20,8 @@
                 "VEGA_USER_WALLET_NAME": "vegamarketsim",
                 "VEGA_WALLET_TOKENS_FILE": "${workspaceFolder}/network/wallet-info.json",
                 "VEGA_WALLET_TOKENS_PASSPHRASE_FILE": "${workspaceFolder}/assets/passphrase.txt",
-                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"
+                "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python",
+                "PYTH_PRICE_PULL_API_URL": "http://price-pusher.vega.rocks:8080"
             }
         }
     ]

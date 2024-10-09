@@ -174,7 +174,7 @@ def _scenarios_from_config(
                         update_bias=config[scenario_name].automated_market_maker.update_bias,
                         slippage_tolerance=config[scenario_name].automated_market_maker.slippage_tolerance,
                         initial_mint=config[scenario_name].automated_market_maker.initial_mint,
-                    ),
+                    ) if config[scenario_name].automated_market_maker.enabled else None,
                     auction_trader_args=AuctionTraderArgs(
                         initial_volume=config[scenario_name].auction_trader.initial_volume,
                         initial_mint=config[scenario_name].auction_trader.initial_mint,
